@@ -16,8 +16,10 @@ const distPath = candidates.find((candidate) =>
   fs.existsSync(path.join(candidate, "index.html"))
 );
 
+console.log("Checked paths:", candidates);
+
 if (!distPath) {
-  console.error("Could not find dist/index.html. Checked:", candidates);
+  console.error("Could not find dist/index.html");
   process.exit(1);
 }
 
