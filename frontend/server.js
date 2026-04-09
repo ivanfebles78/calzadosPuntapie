@@ -1,27 +1,10 @@
 import express from "express";
 import path from "path";
-import fs from "fs";
 
 const app = express();
 const port = process.env.PORT || 8080;
 
-const candidates = [
-  path.resolve("dist"),
-  path.resolve("frontend/dist"),
-  path.join(process.cwd(), "dist"),
-  path.join(process.cwd(), "frontend", "dist"),
-];
-
-const distPath = candidates.find((candidate) =>
-  fs.existsSync(path.join(candidate, "index.html"))
-);
-
-console.log("Checked paths:", candidates);
-
-if (!distPath) {
-  console.error("Could not find dist/index.html");
-  process.exit(1);
-}
+const distPath = path.join(process.cwd(), "frontend", "dist");
 
 console.log("Serving files from:", distPath);
 
