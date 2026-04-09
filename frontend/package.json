@@ -4,8 +4,8 @@
   "version": "1.0.3",
   "type": "module",
   "scripts": {
-    "build": "vite build",
-    "start": "npx serve -s dist -l $PORT"
+	"build": "npx vite build",
+	"start": "npx serve -s dist -l $PORT"
   },
   "dependencies": {
     "react": "^18.2.0",
