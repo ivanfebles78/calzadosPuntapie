@@ -2,16 +2,18 @@ import express from "express";
 import path from "path";
 
 const app = express();
-const distPath = path.resolve("dist");
+const PORT = process.env.PORT || 3000;
+
+const distPath = path.join(process.cwd(), "dist");
+
+console.log("Serving files from:", distPath);
 
 app.use(express.static(distPath));
 
-app.get("*", (_req, res) => {
+app.get("*", (req, res) => {
   res.sendFile(path.join(distPath, "index.html"));
 });
 
-const port = process.env.PORT || 8080;
-app.listen(port, "0.0.0.0", () => {
-  console.log(`Frontend running on port ${port}`);
-  console.log(`Serving files from: ${distPath}`);
+app.listen(PORT, () => {
+  console.log(`Frontend running on port ${PORT}`);
 });
