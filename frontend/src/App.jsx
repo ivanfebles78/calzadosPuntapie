@@ -237,7 +237,10 @@ function CustomerModal({ open, onClose, onSubmit, t }) {
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
+      {/* ── modal shell ── */}
       <div className="modal-card mobile-sheet" onClick={(e) => e.stopPropagation()}>
+
+        {/* sticky header — outside the scroll area */}
         <div className="modal-header sticky">
           <div>
             <h2>{t.newClientTitle}</h2>
@@ -248,12 +251,14 @@ function CustomerModal({ open, onClose, onSubmit, t }) {
           </button>
         </div>
 
+        {/* scrollable body */}
         <div className="modal-content-scroll">
-          <form className="modal-grid" onSubmit={submit}>
+          <form id="customer-form" className="modal-grid" onSubmit={submit}>
             <label className="field">
               <span>{t.name}</span>
               <input value={form.nombre} required onChange={(e) => setForm({ ...form, nombre: e.target.value })} />
             </label>
+
             <label className="field birthdate-field">
               <span>{t.birthDate}</span>
               <input
@@ -265,14 +270,17 @@ function CustomerModal({ open, onClose, onSubmit, t }) {
                 onChange={(e) => setForm({ ...form, fecha_nacimiento: e.target.value })}
               />
             </label>
+
             <label className="field">
               <span>{t.phone}</span>
               <input value={form.telefono} required onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
             </label>
+
             <label className="field">
               <span>{t.email}</span>
               <input type="email" value={form.email} required onChange={(e) => setForm({ ...form, email: e.target.value })} />
             </label>
+
             <label className="field">
               <span>{t.nationality}</span>
               <select value={form.nacionalidad} onChange={(e) => setForm({ ...form, nacionalidad: e.target.value })}>
@@ -281,21 +289,24 @@ function CustomerModal({ open, onClose, onSubmit, t }) {
                 ))}
               </select>
             </label>
+
             <label className="field field-span">
               <span>{t.purchase}</span>
               <input value={form.compra} onChange={(e) => setForm({ ...form, compra: e.target.value })} />
             </label>
 
             {error ? <div className="error-box field-span">{error}</div> : null}
-
-            <div className="modal-actions field-span">
-              <button className="ghost-button" type="button" onClick={onClose}>{t.cancel}</button>
-              <button className="primary-button" type="submit" disabled={saving}>
-                {saving ? "…" : t.saveClient}
-              </button>
-            </div>
           </form>
         </div>
+
+        {/* sticky footer — outside the scroll area so it's always visible */}
+        <div className="modal-footer">
+          <button className="ghost-button" type="button" onClick={onClose}>{t.cancel}</button>
+          <button className="primary-button" type="submit" form="customer-form" disabled={saving}>
+            {saving ? "…" : t.saveClient}
+          </button>
+        </div>
+
       </div>
     </div>
   );
