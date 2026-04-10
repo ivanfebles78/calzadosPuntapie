@@ -1,7 +1,7 @@
 {
-  "name": "zapateria-frontend-roles-v9-mobile-sheet",
+  "name": "zapateria-frontend-roles-v11-birthday-dropdowns",
   "private": true,
-  "version": "1.0.7",
+  "version": "1.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",

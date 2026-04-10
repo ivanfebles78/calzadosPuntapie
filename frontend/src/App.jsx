@@ -20,6 +20,22 @@ const nationalities = [
   "Polonia", "Portugal", "Reino Unido", "Rusia", "Suecia", "Suiza", "USA", "OTRO",
 ];
 
+const days = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, "0"));
+const months = [
+  { value: "01", label: "Enero" },
+  { value: "02", label: "Febrero" },
+  { value: "03", label: "Marzo" },
+  { value: "04", label: "Abril" },
+  { value: "05", label: "Mayo" },
+  { value: "06", label: "Junio" },
+  { value: "07", label: "Julio" },
+  { value: "08", label: "Agosto" },
+  { value: "09", label: "Septiembre" },
+  { value: "10", label: "Octubre" },
+  { value: "11", label: "Noviembre" },
+  { value: "12", label: "Diciembre" },
+];
+
 const translations = {
   es: {
     welcome: "Accede a la plataforma de clientes",
@@ -61,8 +77,9 @@ const translations = {
     newClientTitle: "Nuevo cliente",
     newClientSubtitle: "Recoge los datos del cliente y evita duplicados automáticamente.",
     name: "Nombre",
-    birthDate: "Fecha de nacimiento",
-    birthDatePlaceholder: "dd/mm/aaaa",
+    birthday: "Cumpleaños",
+    birthdayDay: "Día",
+    birthdayMonth: "Mes",
     phone: "Teléfono",
     email: "Email",
     purchase: "Compra / ticket",
@@ -193,17 +210,30 @@ function LoginPage({ onLogin, error, loading, language, setLanguage, t }) {
   );
 }
 
-function CustomerModal({ open, onClose, onSubmit, t }) {
+function DesktopCustomerModal({ open, onClose, onSubmit, t }) {
   const [form, setForm] = useState({
-    nombre: "", fecha_nacimiento: "", telefono: "",
-    email: "", nacionalidad: "España", compra: "",
+    nombre: "",
+    cumple_dia: "",
+    cumple_mes: "",
+    telefono: "",
+    email: "",
+    nacionalidad: "España",
+    compra: "",
   });
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (open) {
-      setForm({ nombre: "", fecha_nacimiento: "", telefono: "", email: "", nacionalidad: "España", compra: "" });
+      setForm({
+        nombre: "",
+        cumple_dia: "",
+        cumple_mes: "",
+        telefono: "",
+        email: "",
+        nacionalidad: "España",
+        compra: "",
+      });
       setError("");
       setSaving(false);
     }
@@ -211,119 +241,214 @@ function CustomerModal({ open, onClose, onSubmit, t }) {
 
   if (!open) return null;
 
+  const payload = {
+    ...form,
+    fecha_nacimiento: form.cumple_dia && form.cumple_mes ? `${form.cumple_dia}/${form.cumple_mes}` : "",
+  };
+
   const submit = async (e) => {
     e.preventDefault();
     setSaving(true);
     setError("");
-    try { await onSubmit(form); }
-    catch (err) { setError(err.message || "Error"); }
-    finally { setSaving(false); }
+    try {
+      await onSubmit(payload);
+    } catch (err) {
+      setError(err.message || "Error");
+    } finally {
+      setSaving(false);
+    }
   };
-
-  const inp = {
-    display: "block", width: "100%", boxSizing: "border-box",
-    height: "50px", margin: 0, padding: "0 14px",
-    borderRadius: "14px", border: "2px solid #8aa5c7",
-    background: "#fff", color: "#09111d",
-    fontSize: "16px", fontFamily: "inherit",
-    WebkitAppearance: "none", appearance: "none",
-  };
-  const lbl = { display: "block", color: "#f1f6ff", fontWeight: 600, fontSize: "14px", marginBottom: "6px" };
-  const fld = { width: "100%", marginBottom: "14px" };
 
   return (
-    <div
-      onClick={onClose}
-      style={{
-        position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
-        background: "rgba(3,10,20,0.85)", zIndex: 9999,
-        display: "flex", alignItems: "flex-end", justifyContent: "center",
-      }}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          width: "100%", maxWidth: "780px",
-          height: "88dvh",
-          background: "linear-gradient(180deg,#10203b,#0b1628)",
-          border: "1.5px solid rgba(255,255,255,0.15)",
-          borderRadius: "20px 20px 0 0",
-          display: "flex", flexDirection: "column",
-          overflow: "hidden",
-        }}
-      >
-        <div style={{
-          flexShrink: 0,
-          display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px",
-          padding: "18px 20px 14px",
-          borderBottom: "1px solid rgba(255,255,255,0.1)",
-          background: "rgba(16,32,59,0.98)",
-        }}>
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header sticky">
           <div>
-            <div style={{ color: "#fff", fontSize: "1.2rem", fontWeight: 700 }}>{t.newClientTitle}</div>
-            <div style={{ marginTop: "4px", color: "#d4deea", fontSize: "0.82rem", lineHeight: 1.4 }}>{t.newClientSubtitle}</div>
+            <h2>{t.newClientTitle}</h2>
+            <p>{t.newClientSubtitle}</p>
           </div>
-          <button onClick={onClose} type="button" style={{
-            flexShrink: 0, height: "44px", padding: "0 16px", borderRadius: "14px",
-            border: "2px solid #7aa2d1", background: "#132746", color: "#fff",
-            fontWeight: 700, fontSize: "14px", cursor: "pointer",
-          }}>{t.cancel}</button>
+          <button className="ghost-button" type="button" onClick={onClose}>
+            {t.cancel}
+          </button>
         </div>
 
-        <div style={{
-          flexGrow: 1, minHeight: 0,
-          overflowY: "scroll", WebkitOverflowScrolling: "touch",
-          padding: "18px 20px 4px",
-        }}>
-          <form id="cm-form" onSubmit={submit}>
-            <div style={fld}><label style={lbl}>{t.name}</label>
-              <input style={inp} value={form.nombre} required onChange={(e) => setForm({ ...form, nombre: e.target.value })} />
-            </div>
-            <div style={fld}><label style={lbl}>{t.birthDate}</label>
-              <input style={inp} type="text" inputMode="numeric" placeholder={t.birthDatePlaceholder} value={form.fecha_nacimiento} onChange={(e) => setForm({ ...form, fecha_nacimiento: e.target.value })} />
-            </div>
-            <div style={fld}><label style={lbl}>{t.phone}</label>
-              <input style={inp} value={form.telefono} required onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
-            </div>
-            <div style={fld}><label style={lbl}>{t.email}</label>
-              <input style={inp} type="email" value={form.email} required onChange={(e) => setForm({ ...form, email: e.target.value })} />
-            </div>
-            <div style={fld}><label style={lbl}>{t.nationality}</label>
-              <select style={inp} value={form.nacionalidad} onChange={(e) => setForm({ ...form, nacionalidad: e.target.value })}>
-                {nationalities.map((n) => <option key={n} value={n}>{n}</option>)}
-              </select>
-            </div>
-            <div style={fld}><label style={lbl}>{t.purchase}</label>
-              <input style={inp} value={form.compra} onChange={(e) => setForm({ ...form, compra: e.target.value })} />
-            </div>
-            {error && (
-              <div style={{ padding: "12px 14px", borderRadius: "12px", marginBottom: "8px", background: "#4c1116", border: "2px solid #db6a74", color: "#ffe0e3", fontWeight: 600, fontSize: "14px" }}>
-                {error}
+        <div className="modal-content-scroll">
+          <form className="modal-grid" onSubmit={submit}>
+            <label className="field">
+              <span>{t.name}</span>
+              <input value={form.nombre} required onChange={(e) => setForm({ ...form, nombre: e.target.value })} />
+            </label>
+
+            <div className="field">
+              <span>{t.birthday}</span>
+              <div className="birthday-row">
+                <select value={form.cumple_dia} onChange={(e) => setForm({ ...form, cumple_dia: e.target.value })}>
+                  <option value="">{t.birthdayDay}</option>
+                  {days.map((day) => (
+                    <option key={day} value={day}>{day}</option>
+                  ))}
+                </select>
+                <select value={form.cumple_mes} onChange={(e) => setForm({ ...form, cumple_mes: e.target.value })}>
+                  <option value="">{t.birthdayMonth}</option>
+                  {months.map((month) => (
+                    <option key={month.value} value={month.value}>{month.label}</option>
+                  ))}
+                </select>
               </div>
-            )}
+            </div>
+
+            <label className="field">
+              <span>{t.phone}</span>
+              <input value={form.telefono} required onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
+            </label>
+            <label className="field">
+              <span>{t.email}</span>
+              <input type="email" value={form.email} required onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            </label>
+            <label className="field">
+              <span>{t.nationality}</span>
+              <select value={form.nacionalidad} onChange={(e) => setForm({ ...form, nacionalidad: e.target.value })}>
+                {nationalities.map((item) => (
+                  <option key={item} value={item}>{item}</option>
+                ))}
+              </select>
+            </label>
+            <label className="field field-span">
+              <span>{t.purchase}</span>
+              <input value={form.compra} onChange={(e) => setForm({ ...form, compra: e.target.value })} />
+            </label>
+
+            {error ? <div className="error-box field-span">{error}</div> : null}
+
+            <div className="modal-actions field-span">
+              <button className="ghost-button" type="button" onClick={onClose}>{t.cancel}</button>
+              <button className="primary-button" type="submit" disabled={saving}>
+                {saving ? "…" : t.saveClient}
+              </button>
+            </div>
           </form>
         </div>
+      </div>
+    </div>
+  );
+}
 
-        <div style={{
-          flexShrink: 0,
-          display: "flex", flexDirection: "column", gap: "10px",
-          padding: "12px 20px 20px",
-          borderTop: "1px solid rgba(255,255,255,0.1)",
-          background: "rgba(11,22,40,0.98)",
-        }}>
-          <button type="submit" form="cm-form" disabled={saving} style={{
-            height: "52px", borderRadius: "16px", border: "none", width: "100%",
-            background: "linear-gradient(135deg,#7fd4ff,#2f6cff)",
-            color: "#03101f", fontWeight: 700, fontSize: "16px", cursor: "pointer",
-          }}>{saving ? "…" : t.saveClient}</button>
-          <button type="button" onClick={onClose} style={{
-            height: "52px", borderRadius: "16px", width: "100%",
-            border: "2px solid #7aa2d1", background: "#132746",
-            color: "#fff", fontWeight: 700, fontSize: "16px", cursor: "pointer",
-          }}>{t.cancel}</button>
+function MobileCustomerScreen({ open, onClose, onSubmit, t }) {
+  const [form, setForm] = useState({
+    nombre: "",
+    cumple_dia: "",
+    cumple_mes: "",
+    telefono: "",
+    email: "",
+    nacionalidad: "España",
+    compra: "",
+  });
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setForm({
+        nombre: "",
+        cumple_dia: "",
+        cumple_mes: "",
+        telefono: "",
+        email: "",
+        nacionalidad: "España",
+        compra: "",
+      });
+      setError("");
+      setSaving(false);
+    }
+  }, [open]);
+
+  if (!open) return null;
+
+  const payload = {
+    ...form,
+    fecha_nacimiento: form.cumple_dia && form.cumple_mes ? `${form.cumple_dia}/${form.cumple_mes}` : "",
+  };
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    try {
+      await onSubmit(payload);
+    } catch (err) {
+      setError(err.message || "Error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="customer-screen">
+      <div className="customer-screen__header">
+        <div>
+          <h2>{t.newClientTitle}</h2>
+          <p>{t.newClientSubtitle}</p>
+        </div>
+        <button className="ghost-button" type="button" onClick={onClose}>{t.cancel}</button>
+      </div>
+
+      <form className="customer-screen__body" onSubmit={submit}>
+        <label className="field">
+          <span>{t.name}</span>
+          <input value={form.nombre} required onChange={(e) => setForm({ ...form, nombre: e.target.value })} />
+        </label>
+
+        <div className="field">
+          <span>{t.birthday}</span>
+          <div className="birthday-row mobile-birthday-row">
+            <select value={form.cumple_dia} onChange={(e) => setForm({ ...form, cumple_dia: e.target.value })}>
+              <option value="">{t.birthdayDay}</option>
+              {days.map((day) => (
+                <option key={day} value={day}>{day}</option>
+              ))}
+            </select>
+            <select value={form.cumple_mes} onChange={(e) => setForm({ ...form, cumple_mes: e.target.value })}>
+              <option value="">{t.birthdayMonth}</option>
+              {months.map((month) => (
+                <option key={month.value} value={month.value}>{month.label}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
-      </div>
+        <label className="field">
+          <span>{t.phone}</span>
+          <input value={form.telefono} required onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
+        </label>
+
+        <label className="field">
+          <span>{t.email}</span>
+          <input type="email" value={form.email} required onChange={(e) => setForm({ ...form, email: e.target.value })} />
+        </label>
+
+        <label className="field">
+          <span>{t.nationality}</span>
+          <select value={form.nacionalidad} onChange={(e) => setForm({ ...form, nacionalidad: e.target.value })}>
+            {nationalities.map((item) => (
+              <option key={item} value={item}>{item}</option>
+            ))}
+          </select>
+        </label>
+
+        <label className="field">
+          <span>{t.purchase}</span>
+          <input value={form.compra} onChange={(e) => setForm({ ...form, compra: e.target.value })} />
+        </label>
+
+        {error ? <div className="error-box">{error}</div> : null}
+
+        <div className="customer-screen__footer">
+          <button className="ghost-button" type="button" onClick={onClose}>{t.cancel}</button>
+          <button className="primary-button" type="submit" disabled={saving}>
+            {saving ? "…" : t.saveClient}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
@@ -384,8 +509,16 @@ export default function App() {
   const [flash, setFlash] = useState("");
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [showStatsModal, setShowStatsModal] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   const t = translations[language] || translations.es;
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 640);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     document.body.classList.toggle("modal-open", showCustomerModal || showStatsModal);
@@ -584,12 +717,21 @@ export default function App() {
         </section>
       </main>
 
-      <CustomerModal
-        open={showCustomerModal}
-        onClose={() => setShowCustomerModal(false)}
-        onSubmit={handleCreate}
-        t={t}
-      />
+      {isMobile ? (
+        <MobileCustomerScreen
+          open={showCustomerModal}
+          onClose={() => setShowCustomerModal(false)}
+          onSubmit={handleCreate}
+          t={t}
+        />
+      ) : (
+        <DesktopCustomerModal
+          open={showCustomerModal}
+          onClose={() => setShowCustomerModal(false)}
+          onSubmit={handleCreate}
+          t={t}
+        />
+      )}
 
       {auth.role === "admin" ? (
         <StatsModal
