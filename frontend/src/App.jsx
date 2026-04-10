@@ -235,74 +235,163 @@ function CustomerModal({ open, onClose, onSubmit, t }) {
     }
   };
 
-  return (
-    <div className="modal-backdrop" onClick={onClose}>
-      {/* ── modal shell ── */}
-      <div className="modal-card mobile-sheet" onClick={(e) => e.stopPropagation()}>
+  // Inline styles guarantee no CSS file can override the scroll layout.
+  // The backdrop covers the full viewport. The modal shell is a flex column
+  // that fills the screen on mobile. Header and footer are pinned (flex:0 0 auto).
+  // Only the middle section scrolls (flex:1 1 auto + minHeight:0 + overflowY:auto).
+  const isMobile = window.innerWidth <= 640;
 
-        {/* sticky header — outside the scroll area */}
-        <div className="modal-header sticky">
+  const backdropStyle = {
+    position: "fixed",
+    inset: 0,
+    background: "rgba(3,10,20,0.82)",
+    display: "flex",
+    alignItems: isMobile ? "stretch" : "center",
+    justifyContent: isMobile ? "stretch" : "center",
+    padding: isMobile ? 0 : "24px",
+    zIndex: 40,
+  };
+
+  const modalStyle = {
+    width: isMobile ? "100%" : "min(780px, 100%)",
+    height: isMobile ? "100dvh" : "auto",
+    maxHeight: isMobile ? "100dvh" : "min(90vh, 980px)",
+    borderRadius: isMobile ? 0 : "30px",
+    background: "linear-gradient(180deg, #10203b 0%, #0b1628 100%)",
+    border: "2px solid rgba(255,255,255,0.16)",
+    display: "flex",
+    flexDirection: "column",
+    overflow: "hidden",
+  };
+
+  const headerStyle = {
+    flex: "0 0 auto",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: "16px",
+    padding: "22px 20px 18px",
+    borderBottom: "1px solid rgba(255,255,255,0.1)",
+    background: "rgba(16,32,59,0.98)",
+  };
+
+  const scrollStyle = {
+    flex: "1 1 auto",
+    minHeight: 0,
+    overflowY: "auto",
+    WebkitOverflowScrolling: "touch",
+    overscrollBehavior: "contain",
+  };
+
+  const formStyle = {
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px",
+    padding: "18px 20px 24px",
+  };
+
+  const fieldStyle = {
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+    width: "100%",
+  };
+
+  const labelStyle = {
+    color: "#f1f6ff",
+    fontWeight: 600,
+    fontSize: "0.94rem",
+  };
+
+  const inputStyle = {
+    width: "100%",
+    height: "52px",
+    borderRadius: "16px",
+    border: "2px solid #8aa5c7",
+    background: "#ffffff",
+    color: "#09111d",
+    padding: "0 16px",
+    font: "inherit",
+    fontSize: "1rem",
+    boxSizing: "border-box",
+  };
+
+  const footerStyle = {
+    flex: "0 0 auto",
+    display: "flex",
+    flexDirection: isMobile ? "column" : "row",
+    justifyContent: "flex-end",
+    gap: "10px",
+    padding: "14px 20px",
+    paddingBottom: "max(14px, env(safe-area-inset-bottom))",
+    borderTop: "1px solid rgba(255,255,255,0.1)",
+    background: "rgba(11,22,40,0.98)",
+  };
+
+  return (
+    <div style={backdropStyle} onClick={onClose}>
+      <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
+
+        {/* HEADER — pinned */}
+        <div style={headerStyle}>
           <div>
-            <h2>{t.newClientTitle}</h2>
-            <p>{t.newClientSubtitle}</p>
+            <h2 style={{ margin: 0, color: "#fff", fontSize: "1.4rem" }}>{t.newClientTitle}</h2>
+            <p style={{ margin: "8px 0 0", color: "#d4deea", lineHeight: 1.5, fontSize: "0.9rem" }}>{t.newClientSubtitle}</p>
           </div>
-          <button className="ghost-button" type="button" onClick={onClose}>
+          <button className="ghost-button" type="button" onClick={onClose} style={{ flexShrink: 0 }}>
             {t.cancel}
           </button>
         </div>
 
-        {/* scrollable body */}
-        <div className="modal-content-scroll">
-          <form id="customer-form" className="modal-grid" onSubmit={submit}>
-            <label className="field">
-              <span>{t.name}</span>
-              <input value={form.nombre} required onChange={(e) => setForm({ ...form, nombre: e.target.value })} />
-            </label>
+        {/* SCROLL AREA — only this moves */}
+        <div style={scrollStyle}>
+          <form id="customer-form" onSubmit={submit} style={formStyle}>
 
-            <label className="field birthdate-field">
-              <span>{t.birthDate}</span>
-              <input
-                className="compact-input birthdate-input"
-                type="text"
-                inputMode="numeric"
-                placeholder={t.birthDatePlaceholder}
-                value={form.fecha_nacimiento}
-                onChange={(e) => setForm({ ...form, fecha_nacimiento: e.target.value })}
-              />
-            </label>
+            <div style={fieldStyle}>
+              <span style={labelStyle}>{t.name}</span>
+              <input style={inputStyle} value={form.nombre} required onChange={(e) => setForm({ ...form, nombre: e.target.value })} />
+            </div>
 
-            <label className="field">
-              <span>{t.phone}</span>
-              <input value={form.telefono} required onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
-            </label>
+            <div style={fieldStyle}>
+              <span style={labelStyle}>{t.birthDate}</span>
+              <input style={inputStyle} type="text" inputMode="numeric" placeholder={t.birthDatePlaceholder} value={form.fecha_nacimiento} onChange={(e) => setForm({ ...form, fecha_nacimiento: e.target.value })} />
+            </div>
 
-            <label className="field">
-              <span>{t.email}</span>
-              <input type="email" value={form.email} required onChange={(e) => setForm({ ...form, email: e.target.value })} />
-            </label>
+            <div style={fieldStyle}>
+              <span style={labelStyle}>{t.phone}</span>
+              <input style={inputStyle} value={form.telefono} required onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
+            </div>
 
-            <label className="field">
-              <span>{t.nationality}</span>
-              <select value={form.nacionalidad} onChange={(e) => setForm({ ...form, nacionalidad: e.target.value })}>
+            <div style={fieldStyle}>
+              <span style={labelStyle}>{t.email}</span>
+              <input style={inputStyle} type="email" value={form.email} required onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            </div>
+
+            <div style={fieldStyle}>
+              <span style={labelStyle}>{t.nationality}</span>
+              <select style={inputStyle} value={form.nacionalidad} onChange={(e) => setForm({ ...form, nacionalidad: e.target.value })}>
                 {nationalities.map((item) => (
                   <option key={item} value={item}>{item}</option>
                 ))}
               </select>
-            </label>
+            </div>
 
-            <label className="field field-span">
-              <span>{t.purchase}</span>
-              <input value={form.compra} onChange={(e) => setForm({ ...form, compra: e.target.value })} />
-            </label>
+            <div style={fieldStyle}>
+              <span style={labelStyle}>{t.purchase}</span>
+              <input style={inputStyle} value={form.compra} onChange={(e) => setForm({ ...form, compra: e.target.value })} />
+            </div>
 
-            {error ? <div className="error-box field-span">{error}</div> : null}
+            {error ? <div className="error-box">{error}</div> : null}
+
           </form>
         </div>
 
-        {/* sticky footer — outside the scroll area so it's always visible */}
-        <div className="modal-footer">
-          <button className="ghost-button" type="button" onClick={onClose}>{t.cancel}</button>
-          <button className="primary-button" type="submit" form="customer-form" disabled={saving}>
+        {/* FOOTER — pinned */}
+        <div style={footerStyle}>
+          <button className="ghost-button" type="button" onClick={onClose} style={isMobile ? { width: "100%" } : {}}>
+            {t.cancel}
+          </button>
+          <button className="primary-button" type="submit" form="customer-form" disabled={saving} style={isMobile ? { width: "100%" } : {}}>
             {saving ? "…" : t.saveClient}
           </button>
         </div>
