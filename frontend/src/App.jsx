@@ -195,26 +195,15 @@ function LoginPage({ onLogin, error, loading, language, setLanguage, t }) {
 
 function CustomerModal({ open, onClose, onSubmit, t }) {
   const [form, setForm] = useState({
-    nombre: "",
-    fecha_nacimiento: "",
-    telefono: "",
-    email: "",
-    nacionalidad: "España",
-    compra: "",
+    nombre: "", fecha_nacimiento: "", telefono: "",
+    email: "", nacionalidad: "España", compra: "",
   });
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (open) {
-      setForm({
-        nombre: "",
-        fecha_nacimiento: "",
-        telefono: "",
-        email: "",
-        nacionalidad: "España",
-        compra: "",
-      });
+      setForm({ nombre: "", fecha_nacimiento: "", telefono: "", email: "", nacionalidad: "España", compra: "" });
       setError("");
       setSaving(false);
     }
@@ -226,174 +215,112 @@ function CustomerModal({ open, onClose, onSubmit, t }) {
     e.preventDefault();
     setSaving(true);
     setError("");
-    try {
-      await onSubmit(form);
-    } catch (err) {
-      setError(err.message || "Error");
-    } finally {
-      setSaving(false);
-    }
+    try { await onSubmit(form); }
+    catch (err) { setError(err.message || "Error"); }
+    finally { setSaving(false); }
   };
 
-  // Inline styles guarantee no CSS file can override the scroll layout.
-  // The backdrop covers the full viewport. The modal shell is a flex column
-  // that fills the screen on mobile. Header and footer are pinned (flex:0 0 auto).
-  // Only the middle section scrolls (flex:1 1 auto + minHeight:0 + overflowY:auto).
-  const isMobile = window.innerWidth <= 640;
-
-  const backdropStyle = {
-    position: "fixed",
-    inset: 0,
-    background: "rgba(3,10,20,0.82)",
-    display: "flex",
-    alignItems: isMobile ? "stretch" : "center",
-    justifyContent: isMobile ? "stretch" : "center",
-    padding: isMobile ? 0 : "24px",
-    zIndex: 40,
+  const inp = {
+    display: "block", width: "100%", boxSizing: "border-box",
+    height: "50px", margin: 0, padding: "0 14px",
+    borderRadius: "14px", border: "2px solid #8aa5c7",
+    background: "#fff", color: "#09111d",
+    fontSize: "16px", fontFamily: "inherit",
+    WebkitAppearance: "none", appearance: "none",
   };
-
-  const modalStyle = {
-    width: isMobile ? "100%" : "min(780px, 100%)",
-    height: isMobile ? "100dvh" : "auto",
-    maxHeight: isMobile ? "100dvh" : "min(90vh, 980px)",
-    borderRadius: isMobile ? 0 : "30px",
-    background: "linear-gradient(180deg, #10203b 0%, #0b1628 100%)",
-    border: "2px solid rgba(255,255,255,0.16)",
-    display: "flex",
-    flexDirection: "column",
-    overflow: "hidden",
-  };
-
-  const headerStyle = {
-    flex: "0 0 auto",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: "16px",
-    padding: "22px 20px 18px",
-    borderBottom: "1px solid rgba(255,255,255,0.1)",
-    background: "rgba(16,32,59,0.98)",
-  };
-
-  const scrollStyle = {
-    flex: "1 1 auto",
-    minHeight: 0,
-    overflowY: "auto",
-    WebkitOverflowScrolling: "touch",
-    overscrollBehavior: "contain",
-  };
-
-  const formStyle = {
-    display: "flex",
-    flexDirection: "column",
-    gap: "16px",
-    padding: "18px 20px 24px",
-  };
-
-  const fieldStyle = {
-    display: "flex",
-    flexDirection: "column",
-    gap: "6px",
-    width: "100%",
-  };
-
-  const labelStyle = {
-    color: "#f1f6ff",
-    fontWeight: 600,
-    fontSize: "0.94rem",
-  };
-
-  const inputStyle = {
-    width: "100%",
-    height: "52px",
-    borderRadius: "16px",
-    border: "2px solid #8aa5c7",
-    background: "#ffffff",
-    color: "#09111d",
-    padding: "0 16px",
-    font: "inherit",
-    fontSize: "1rem",
-    boxSizing: "border-box",
-  };
-
-  const footerStyle = {
-    flex: "0 0 auto",
-    display: "flex",
-    flexDirection: isMobile ? "column" : "row",
-    justifyContent: "flex-end",
-    gap: "10px",
-    padding: "14px 20px",
-    paddingBottom: "max(14px, env(safe-area-inset-bottom))",
-    borderTop: "1px solid rgba(255,255,255,0.1)",
-    background: "rgba(11,22,40,0.98)",
-  };
+  const lbl = { display: "block", color: "#f1f6ff", fontWeight: 600, fontSize: "14px", marginBottom: "6px" };
+  const fld = { width: "100%", marginBottom: "14px" };
 
   return (
-    <div style={backdropStyle} onClick={onClose}>
-      <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
-
-        {/* HEADER — pinned */}
-        <div style={headerStyle}>
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+        background: "rgba(3,10,20,0.85)", zIndex: 9999,
+        display: "flex", alignItems: "flex-end", justifyContent: "center",
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: "100%", maxWidth: "780px",
+          height: "88dvh",
+          background: "linear-gradient(180deg,#10203b,#0b1628)",
+          border: "1.5px solid rgba(255,255,255,0.15)",
+          borderRadius: "20px 20px 0 0",
+          display: "flex", flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
+        <div style={{
+          flexShrink: 0,
+          display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px",
+          padding: "18px 20px 14px",
+          borderBottom: "1px solid rgba(255,255,255,0.1)",
+          background: "rgba(16,32,59,0.98)",
+        }}>
           <div>
-            <h2 style={{ margin: 0, color: "#fff", fontSize: "1.4rem" }}>{t.newClientTitle}</h2>
-            <p style={{ margin: "8px 0 0", color: "#d4deea", lineHeight: 1.5, fontSize: "0.9rem" }}>{t.newClientSubtitle}</p>
+            <div style={{ color: "#fff", fontSize: "1.2rem", fontWeight: 700 }}>{t.newClientTitle}</div>
+            <div style={{ marginTop: "4px", color: "#d4deea", fontSize: "0.82rem", lineHeight: 1.4 }}>{t.newClientSubtitle}</div>
           </div>
-          <button className="ghost-button" type="button" onClick={onClose} style={{ flexShrink: 0 }}>
-            {t.cancel}
-          </button>
+          <button onClick={onClose} type="button" style={{
+            flexShrink: 0, height: "44px", padding: "0 16px", borderRadius: "14px",
+            border: "2px solid #7aa2d1", background: "#132746", color: "#fff",
+            fontWeight: 700, fontSize: "14px", cursor: "pointer",
+          }}>{t.cancel}</button>
         </div>
 
-        {/* SCROLL AREA — only this moves */}
-        <div style={scrollStyle}>
-          <form id="customer-form" onSubmit={submit} style={formStyle}>
-
-            <div style={fieldStyle}>
-              <span style={labelStyle}>{t.name}</span>
-              <input style={inputStyle} value={form.nombre} required onChange={(e) => setForm({ ...form, nombre: e.target.value })} />
+        <div style={{
+          flexGrow: 1, minHeight: 0,
+          overflowY: "scroll", WebkitOverflowScrolling: "touch",
+          padding: "18px 20px 4px",
+        }}>
+          <form id="cm-form" onSubmit={submit}>
+            <div style={fld}><label style={lbl}>{t.name}</label>
+              <input style={inp} value={form.nombre} required onChange={(e) => setForm({ ...form, nombre: e.target.value })} />
             </div>
-
-            <div style={fieldStyle}>
-              <span style={labelStyle}>{t.birthDate}</span>
-              <input style={inputStyle} type="text" inputMode="numeric" placeholder={t.birthDatePlaceholder} value={form.fecha_nacimiento} onChange={(e) => setForm({ ...form, fecha_nacimiento: e.target.value })} />
+            <div style={fld}><label style={lbl}>{t.birthDate}</label>
+              <input style={inp} type="text" inputMode="numeric" placeholder={t.birthDatePlaceholder} value={form.fecha_nacimiento} onChange={(e) => setForm({ ...form, fecha_nacimiento: e.target.value })} />
             </div>
-
-            <div style={fieldStyle}>
-              <span style={labelStyle}>{t.phone}</span>
-              <input style={inputStyle} value={form.telefono} required onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
+            <div style={fld}><label style={lbl}>{t.phone}</label>
+              <input style={inp} value={form.telefono} required onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
             </div>
-
-            <div style={fieldStyle}>
-              <span style={labelStyle}>{t.email}</span>
-              <input style={inputStyle} type="email" value={form.email} required onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            <div style={fld}><label style={lbl}>{t.email}</label>
+              <input style={inp} type="email" value={form.email} required onChange={(e) => setForm({ ...form, email: e.target.value })} />
             </div>
-
-            <div style={fieldStyle}>
-              <span style={labelStyle}>{t.nationality}</span>
-              <select style={inputStyle} value={form.nacionalidad} onChange={(e) => setForm({ ...form, nacionalidad: e.target.value })}>
-                {nationalities.map((item) => (
-                  <option key={item} value={item}>{item}</option>
-                ))}
+            <div style={fld}><label style={lbl}>{t.nationality}</label>
+              <select style={inp} value={form.nacionalidad} onChange={(e) => setForm({ ...form, nacionalidad: e.target.value })}>
+                {nationalities.map((n) => <option key={n} value={n}>{n}</option>)}
               </select>
             </div>
-
-            <div style={fieldStyle}>
-              <span style={labelStyle}>{t.purchase}</span>
-              <input style={inputStyle} value={form.compra} onChange={(e) => setForm({ ...form, compra: e.target.value })} />
+            <div style={fld}><label style={lbl}>{t.purchase}</label>
+              <input style={inp} value={form.compra} onChange={(e) => setForm({ ...form, compra: e.target.value })} />
             </div>
-
-            {error ? <div className="error-box">{error}</div> : null}
-
+            {error && (
+              <div style={{ padding: "12px 14px", borderRadius: "12px", marginBottom: "8px", background: "#4c1116", border: "2px solid #db6a74", color: "#ffe0e3", fontWeight: 600, fontSize: "14px" }}>
+                {error}
+              </div>
+            )}
           </form>
         </div>
 
-        {/* FOOTER — pinned */}
-        <div style={footerStyle}>
-          <button className="ghost-button" type="button" onClick={onClose} style={isMobile ? { width: "100%" } : {}}>
-            {t.cancel}
-          </button>
-          <button className="primary-button" type="submit" form="customer-form" disabled={saving} style={isMobile ? { width: "100%" } : {}}>
-            {saving ? "…" : t.saveClient}
-          </button>
+        <div style={{
+          flexShrink: 0,
+          display: "flex", flexDirection: "column", gap: "10px",
+          padding: "12px 20px 20px",
+          borderTop: "1px solid rgba(255,255,255,0.1)",
+          background: "rgba(11,22,40,0.98)",
+        }}>
+          <button type="submit" form="cm-form" disabled={saving} style={{
+            height: "52px", borderRadius: "16px", border: "none", width: "100%",
+            background: "linear-gradient(135deg,#7fd4ff,#2f6cff)",
+            color: "#03101f", fontWeight: 700, fontSize: "16px", cursor: "pointer",
+          }}>{saving ? "…" : t.saveClient}</button>
+          <button type="button" onClick={onClose} style={{
+            height: "52px", borderRadius: "16px", width: "100%",
+            border: "2px solid #7aa2d1", background: "#132746",
+            color: "#fff", fontWeight: 700, fontSize: "16px", cursor: "pointer",
+          }}>{t.cancel}</button>
         </div>
 
       </div>
