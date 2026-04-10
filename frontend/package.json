@@ -1,19 +1,18 @@
 {
   "name": "zapateria-frontend-roles-v4-fixed",
   "private": true,
-  "version": "1.0.4",
+  "version": "1.0.3",
   "type": "module",
   "scripts": {
     "build": "npx vite build",
-    "start": "node server.js"
+    "start": "npx vite preview --host 0.0.0.0 --port $PORT"
   },
   "dependencies": {
-    "express": "^4.21.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.1",
-    "vite": "^5.0.0"
+    "vite": "^8.0.8"
   }
 }
