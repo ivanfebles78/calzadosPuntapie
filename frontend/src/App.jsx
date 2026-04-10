@@ -66,186 +66,6 @@ const translations = {
     email: "Email",
     purchase: "Compra / ticket",
   },
-  en: {
-    welcome: "Access the customer platform",
-    password: "Password",
-    login: "Sign in",
-    loadingLogin: "Signing in…",
-    search: "Search by name, email or phone…",
-    searchButton: "Search",
-    clearButton: "Clear",
-    newClient: "New customer",
-    statistics: "Statistics",
-    exportExcel: "Export Excel",
-    importExcel: "Import Excel",
-    clients: "Customers",
-    allClients: "Full list of registered customers",
-    customer: "Customer",
-    contact: "Contact",
-    nationality: "Nationality",
-    registered: "Registered",
-    noClients: "No customers registered.",
-    loading: "Loading…",
-    logout: "Logout",
-    sessionAs: "Logged in as",
-    role: "role",
-    saveClient: "Save customer",
-    cancel: "Cancel",
-    close: "Close",
-    clientRegistered: "Customer registered successfully.",
-    statsTitle: "Statistics",
-    statsSubtitle: "Visual analysis of customers and registrations",
-    nationalityDistribution: "Nationality distribution",
-    ageDistribution: "Age distribution",
-    dayLastMonth: "Registrations by day for the last month",
-    monthLastYear: "Registrations by month for the last year",
-    topBottomDays: "Highest and lowest registration days",
-    topBottomHours: "Highest and lowest registration time slots",
-    highest: "Highest",
-    lowest: "Lowest",
-    newClientTitle: "New customer",
-    newClientSubtitle: "Collect customer details and avoid duplicates automatically.",
-    name: "Name",
-    birthDate: "Birth date",
-    phone: "Phone",
-    email: "Email",
-    purchase: "Purchase / receipt",
-  },
-  fr: {
-    welcome: "Accédez à la plateforme clients",
-    password: "Mot de passe",
-    login: "Entrer",
-    loadingLogin: "Connexion…",
-    search: "Rechercher par nom, email ou téléphone…",
-    searchButton: "Rechercher",
-    clearButton: "Effacer",
-    newClient: "Nouveau client",
-    statistics: "Statistiques",
-    exportExcel: "Exporter Excel",
-    importExcel: "Importer Excel",
-    clients: "Clients",
-    allClients: "Liste complète des clients enregistrés",
-    customer: "Client",
-    contact: "Contact",
-    nationality: "Nationalité",
-    registered: "Enregistrement",
-    noClients: "Aucun client enregistré.",
-    loading: "Chargement…",
-    logout: "Quitter",
-    sessionAs: "Session ouverte comme",
-    role: "rôle",
-    saveClient: "Enregistrer le client",
-    cancel: "Annuler",
-    close: "Fermer",
-    clientRegistered: "Client enregistré avec succès.",
-    statsTitle: "Statistiques",
-    statsSubtitle: "Analyse visuelle des clients et des inscriptions",
-    nationalityDistribution: "Répartition par nationalité",
-    ageDistribution: "Répartition par âge",
-    dayLastMonth: "Inscriptions par jour du dernier mois",
-    monthLastYear: "Inscriptions par mois de la dernière année",
-    topBottomDays: "Jours de plus et moins d’inscriptions",
-    topBottomHours: "Tranches horaires de plus et moins d’inscriptions",
-    highest: "Plus élevé",
-    lowest: "Plus faible",
-    newClientTitle: "Nouveau client",
-    newClientSubtitle: "Collectez les données du client et évitez automatiquement les doublons.",
-    name: "Nom",
-    birthDate: "Date de naissance",
-    phone: "Téléphone",
-    email: "Email",
-    purchase: "Achat / ticket",
-  },
-  de: {
-    welcome: "Zugriff auf die Kundenplattform",
-    password: "Passwort",
-    login: "Anmelden",
-    loadingLogin: "Anmeldung…",
-    search: "Nach Name, E-Mail oder Telefon suchen…",
-    searchButton: "Suchen",
-    clearButton: "Zurücksetzen",
-    newClient: "Neuer Kunde",
-    statistics: "Statistiken",
-    exportExcel: "Excel exportieren",
-    importExcel: "Excel importieren",
-    clients: "Kunden",
-    allClients: "Vollständige Liste registrierter Kunden",
-    customer: "Kunde",
-    contact: "Kontakt",
-    nationality: "Nationalität",
-    registered: "Registriert",
-    noClients: "Keine Kunden registriert.",
-    loading: "Laden…",
-    logout: "Abmelden",
-    sessionAs: "Angemeldet als",
-    role: "Rolle",
-    saveClient: "Kunde speichern",
-    cancel: "Abbrechen",
-    close: "Schließen",
-    clientRegistered: "Kunde erfolgreich registriert.",
-    statsTitle: "Statistiken",
-    statsSubtitle: "Visuelle Analyse von Kunden und Registrierungen",
-    nationalityDistribution: "Verteilung nach Nationalität",
-    ageDistribution: "Verteilung nach Alter",
-    dayLastMonth: "Registrierungen pro Tag im letzten Monat",
-    monthLastYear: "Registrierungen pro Monat im letzten Jahr",
-    topBottomDays: "Tage mit den meisten und wenigsten Registrierungen",
-    topBottomHours: "Zeitfenster mit den meisten und wenigsten Registrierungen",
-    highest: "Höchste",
-    lowest: "Niedrigste",
-    newClientTitle: "Neuer Kunde",
-    newClientSubtitle: "Erfassen Sie Kundendaten und vermeiden Sie automatisch Duplikate.",
-    name: "Name",
-    birthDate: "Geburtsdatum",
-    phone: "Telefon",
-    email: "E-Mail",
-    purchase: "Kauf / Beleg",
-  },
-  ru: {
-    welcome: "Вход в платформу клиентов",
-    password: "Пароль",
-    login: "Войти",
-    loadingLogin: "Вход…",
-    search: "Поиск по имени, email или телефону…",
-    searchButton: "Поиск",
-    clearButton: "Очистить",
-    newClient: "Новый клиент",
-    statistics: "Статистика",
-    exportExcel: "Экспорт Excel",
-    importExcel: "Импорт Excel",
-    clients: "Клиенты",
-    allClients: "Полный список зарегистрированных клиентов",
-    customer: "Клиент",
-    contact: "Контакт",
-    nationality: "Национальность",
-    registered: "Регистрация",
-    noClients: "Клиентов нет.",
-    loading: "Загрузка…",
-    logout: "Выход",
-    sessionAs: "Вы вошли как",
-    role: "роль",
-    saveClient: "Сохранить клиента",
-    cancel: "Отмена",
-    close: "Закрыть",
-    clientRegistered: "Клиент успешно зарегистрирован.",
-    statsTitle: "Статистика",
-    statsSubtitle: "Визуальный анализ клиентов и регистраций",
-    nationalityDistribution: "Распределение по национальности",
-    ageDistribution: "Распределение по возрасту",
-    dayLastMonth: "Регистрации по дням за последний месяц",
-    monthLastYear: "Регистрации по месяцам за последний год",
-    topBottomDays: "Дни с максимальной и минимальной регистрацией",
-    topBottomHours: "Часы с максимальной и минимальной регистрацией",
-    highest: "Максимум",
-    lowest: "Минимум",
-    newClientTitle: "Новый клиент",
-    newClientSubtitle: "Соберите данные клиента и автоматически избегайте дублей.",
-    name: "Имя",
-    birthDate: "Дата рождения",
-    phone: "Телефон",
-    email: "Email",
-    purchase: "Покупка / чек",
-  },
 };
 
 const flagItems = [
@@ -303,10 +123,7 @@ function StatBars({ title, data }) {
                 <strong>{item.value}</strong>
               </div>
               <div className="chart-track">
-                <div
-                  className="chart-bar"
-                  style={{ width: `${Math.max((item.value / max) * 100, 6)}%` }}
-                />
+                <div className="chart-bar" style={{ width: `${Math.max((item.value / max) * 100, 6)}%` }} />
               </div>
             </div>
           ))}
@@ -419,7 +236,7 @@ function CustomerModal({ open, onClose, onSubmit, t }) {
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-card modal-card-form" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header sticky">
           <div>
             <h2>{t.newClientTitle}</h2>
@@ -430,45 +247,47 @@ function CustomerModal({ open, onClose, onSubmit, t }) {
           </button>
         </div>
 
-        <form className="modal-grid" onSubmit={submit}>
-          <label className="field">
-            <span>{t.name}</span>
-            <input value={form.nombre} required onChange={(e) => setForm({ ...form, nombre: e.target.value })} />
-          </label>
-          <label className="field">
-            <span>{t.birthDate}</span>
-            <input type="date" value={form.fecha_nacimiento} onChange={(e) => setForm({ ...form, fecha_nacimiento: e.target.value })} />
-          </label>
-          <label className="field">
-            <span>{t.phone}</span>
-            <input value={form.telefono} required onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
-          </label>
-          <label className="field">
-            <span>{t.email}</span>
-            <input type="email" value={form.email} required onChange={(e) => setForm({ ...form, email: e.target.value })} />
-          </label>
-          <label className="field">
-            <span>{t.nationality}</span>
-            <select value={form.nacionalidad} onChange={(e) => setForm({ ...form, nacionalidad: e.target.value })}>
-              {nationalities.map((item) => (
-                <option key={item} value={item}>{item}</option>
-              ))}
-            </select>
-          </label>
-          <label className="field field-span">
-            <span>{t.purchase}</span>
-            <input value={form.compra} onChange={(e) => setForm({ ...form, compra: e.target.value })} />
-          </label>
+        <div className="modal-scroll-area">
+          <form className="modal-grid" onSubmit={submit}>
+            <label className="field">
+              <span>{t.name}</span>
+              <input value={form.nombre} required onChange={(e) => setForm({ ...form, nombre: e.target.value })} />
+            </label>
+            <label className="field">
+              <span>{t.birthDate}</span>
+              <input className="date-input" type="date" value={form.fecha_nacimiento} onChange={(e) => setForm({ ...form, fecha_nacimiento: e.target.value })} />
+            </label>
+            <label className="field">
+              <span>{t.phone}</span>
+              <input value={form.telefono} required onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
+            </label>
+            <label className="field">
+              <span>{t.email}</span>
+              <input type="email" value={form.email} required onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            </label>
+            <label className="field">
+              <span>{t.nationality}</span>
+              <select value={form.nacionalidad} onChange={(e) => setForm({ ...form, nacionalidad: e.target.value })}>
+                {nationalities.map((item) => (
+                  <option key={item} value={item}>{item}</option>
+                ))}
+              </select>
+            </label>
+            <label className="field field-span">
+              <span>{t.purchase}</span>
+              <input value={form.compra} onChange={(e) => setForm({ ...form, compra: e.target.value })} />
+            </label>
 
-          {error ? <div className="error-box">{error}</div> : null}
+            {error ? <div className="error-box field-span">{error}</div> : null}
 
-          <div className="modal-actions">
-            <button className="ghost-button" type="button" onClick={onClose}>{t.cancel}</button>
-            <button className="primary-button" type="submit" disabled={saving}>
-              {saving ? "…" : t.saveClient}
-            </button>
-          </div>
-        </form>
+            <div className="modal-actions field-span">
+              <button className="ghost-button" type="button" onClick={onClose}>{t.cancel}</button>
+              <button className="primary-button" type="submit" disabled={saving}>
+                {saving ? "…" : t.saveClient}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
@@ -479,7 +298,7 @@ function StatsModal({ open, onClose, stats, t }) {
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="stats-modal-card scrollable" onClick={(e) => e.stopPropagation()}>
+      <div className="stats-modal-card" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header sticky">
           <div>
             <h2>{t.statsTitle}</h2>
@@ -490,7 +309,7 @@ function StatsModal({ open, onClose, stats, t }) {
           </button>
         </div>
 
-        <div className="stats-grid">
+        <div className="stats-grid modal-scroll-area">
           <StatBars title={t.nationalityDistribution} data={mapToArray(stats.nationality_distribution)} />
           <StatBars title={t.ageDistribution} data={mapToArray(stats.age_distribution)} />
           <StatBars title={t.dayLastMonth} data={mapToArray(stats.daily_last_month)} />
@@ -532,6 +351,11 @@ export default function App() {
   const [showStatsModal, setShowStatsModal] = useState(false);
 
   const t = translations[language] || translations.es;
+
+  useEffect(() => {
+    document.body.classList.toggle("modal-open", showCustomerModal || showStatsModal);
+    return () => document.body.classList.remove("modal-open");
+  }, [showCustomerModal, showStatsModal]);
 
   useEffect(() => {
     if (!flash) return;

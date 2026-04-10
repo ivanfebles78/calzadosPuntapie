@@ -1,14 +1,10 @@
-# Frontend con roles v5
+# Frontend con roles v7
 
 Cambios:
-- modal de nuevo cliente con scroll en móvil
-- dropdown de usuario en login
-- botón limpiar en búsqueda
-- banderas visibles arriba y cambio de idioma
-- estadísticas con scroll y visuales
-- corregido formatDate
+- arreglado el scroll real del modal de Nuevo cliente en móvil
+- bloqueado el scroll del fondo cuando un modal está abierto
+- el campo Fecha de nacimiento ya no se sale del cuadro
+- se mantiene login con dropdown, limpiar búsqueda, idiomas y estadísticas visuales
 
-
-v6:
-- corregido el scroll interno del modal de Nuevo cliente en móvil
-- el botón de guardar queda accesible al final del modal
+Importante:
+si en Railway ya tienes configurada la URL de producción del backend, conserva tu `src/api.js` actual si ya apunta a producción.

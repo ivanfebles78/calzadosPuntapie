@@ -1,7 +1,7 @@
 {
-  "name": "zapateria-frontend-roles-v5-mobile-modal",
+  "name": "zapateria-frontend-roles-v7-modal-scroll-fix",
   "private": true,
-  "version": "1.0.4",
+  "version": "1.0.5",
   "type": "module",
   "scripts": {
     "dev": "vite",
