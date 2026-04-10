@@ -126,7 +126,9 @@ button { cursor: pointer; }
   border: 2px solid rgba(255,255,255,0.16);
   box-shadow: var(--shadow);
   max-height: min(90vh, 980px);
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   -webkit-overflow-scrolling: touch;
 }
 .stats-modal-card { width: min(1120px, 100%); }
@@ -136,11 +138,30 @@ button { cursor: pointer; }
   background: linear-gradient(180deg, rgba(16,32,59,0.98), rgba(11,22,40,0.95));
   z-index: 2; padding-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,0.1);
 }
-.modal-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 24px 28px 28px; }
+.modal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 24px 28px 28px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+}
 .field { display: flex; flex-direction: column; gap: 10px; }
 .field span { color: #f1f6ff; font-weight: 600; font-size: 0.94rem; }
 .field-span { grid-column: 1 / -1; }
-.modal-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; }
+.modal-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+  position: sticky;
+  bottom: 0;
+  padding-top: 12px;
+  background: linear-gradient(180deg, rgba(16,32,59,0) 0%, rgba(16,32,59,0.96) 22%);
+}
 .error-box {
   padding: 14px 16px; border-radius: 18px;
   background: var(--danger-bg); border: 2px solid #db6a74; color: var(--danger-text); font-weight: 600;
@@ -197,10 +218,13 @@ button { cursor: pointer; }
   }
   .modal-card, .stats-modal-card {
     width: 100%;
-    max-height: calc(100vh - 24px);
-    margin: auto 0;
+    max-height: calc(100dvh - 24px);
+    margin: 0;
   }
   .modal-header, .modal-grid, .stats-grid { padding-left: 18px; padding-right: 18px; }
-  .modal-grid { padding-bottom: 24px; }
+  .modal-grid {
+    padding-bottom: 20px;
+    overscroll-behavior: contain;
+  }
   .flags-inline, .flags-top { flex-wrap: wrap; justify-content: center; }
 }

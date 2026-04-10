@@ -7,3 +7,8 @@ Cambios:
 - banderas visibles arriba y cambio de idioma
 - estadísticas con scroll y visuales
 - corregido formatDate
+
+
+v6:
+- corregido el scroll interno del modal de Nuevo cliente en móvil
+- el botón de guardar queda accesible al final del modal
