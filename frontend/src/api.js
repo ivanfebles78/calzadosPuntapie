@@ -1,5 +1,6 @@
 const API_URL = "https://exemplary-insight-production.up.railway.app";
 
+
 function getHeaders(token, extra = {}) {
   return {
     ...(token ? { Authorization: `Bearer ${token}` } : {}),

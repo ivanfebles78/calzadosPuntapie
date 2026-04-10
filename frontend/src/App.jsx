@@ -254,10 +254,10 @@ function CustomerModal({ open, onClose, onSubmit, t }) {
               <span>{t.name}</span>
               <input value={form.nombre} required onChange={(e) => setForm({ ...form, nombre: e.target.value })} />
             </label>
-            <label className="field">
+            <label className="field birthdate-field">
               <span>{t.birthDate}</span>
               <input
-                className="compact-input"
+                className="compact-input birthdate-input"
                 type="text"
                 inputMode="numeric"
                 placeholder={t.birthDatePlaceholder}
