@@ -62,6 +62,7 @@ const translations = {
     newClientSubtitle: "Recoge los datos del cliente y evita duplicados automáticamente.",
     name: "Nombre",
     birthDate: "Fecha de nacimiento",
+    birthDatePlaceholder: "dd/mm/aaaa",
     phone: "Teléfono",
     email: "Email",
     purchase: "Compra / ticket",
@@ -236,7 +237,7 @@ function CustomerModal({ open, onClose, onSubmit, t }) {
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card customer-scroll-card" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-card mobile-sheet" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header sticky">
           <div>
             <h2>{t.newClientTitle}</h2>
@@ -247,45 +248,54 @@ function CustomerModal({ open, onClose, onSubmit, t }) {
           </button>
         </div>
 
-        <form className="modal-grid customer-scroll-body" onSubmit={submit}>
-          <label className="field">
-            <span>{t.name}</span>
-            <input value={form.nombre} required onChange={(e) => setForm({ ...form, nombre: e.target.value })} />
-          </label>
-          <label className="field">
-            <span>{t.birthDate}</span>
-            <input className="date-input" type="date" value={form.fecha_nacimiento} onChange={(e) => setForm({ ...form, fecha_nacimiento: e.target.value })} />
-          </label>
-          <label className="field">
-            <span>{t.phone}</span>
-            <input value={form.telefono} required onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
-          </label>
-          <label className="field">
-            <span>{t.email}</span>
-            <input type="email" value={form.email} required onChange={(e) => setForm({ ...form, email: e.target.value })} />
-          </label>
-          <label className="field">
-            <span>{t.nationality}</span>
-            <select value={form.nacionalidad} onChange={(e) => setForm({ ...form, nacionalidad: e.target.value })}>
-              {nationalities.map((item) => (
-                <option key={item} value={item}>{item}</option>
-              ))}
-            </select>
-          </label>
-          <label className="field field-span">
-            <span>{t.purchase}</span>
-            <input value={form.compra} onChange={(e) => setForm({ ...form, compra: e.target.value })} />
-          </label>
+        <div className="modal-content-scroll">
+          <form className="modal-grid" onSubmit={submit}>
+            <label className="field">
+              <span>{t.name}</span>
+              <input value={form.nombre} required onChange={(e) => setForm({ ...form, nombre: e.target.value })} />
+            </label>
+            <label className="field">
+              <span>{t.birthDate}</span>
+              <input
+                className="compact-input"
+                type="text"
+                inputMode="numeric"
+                placeholder={t.birthDatePlaceholder}
+                value={form.fecha_nacimiento}
+                onChange={(e) => setForm({ ...form, fecha_nacimiento: e.target.value })}
+              />
+            </label>
+            <label className="field">
+              <span>{t.phone}</span>
+              <input value={form.telefono} required onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
+            </label>
+            <label className="field">
+              <span>{t.email}</span>
+              <input type="email" value={form.email} required onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            </label>
+            <label className="field">
+              <span>{t.nationality}</span>
+              <select value={form.nacionalidad} onChange={(e) => setForm({ ...form, nacionalidad: e.target.value })}>
+                {nationalities.map((item) => (
+                  <option key={item} value={item}>{item}</option>
+                ))}
+              </select>
+            </label>
+            <label className="field field-span">
+              <span>{t.purchase}</span>
+              <input value={form.compra} onChange={(e) => setForm({ ...form, compra: e.target.value })} />
+            </label>
 
-          {error ? <div className="error-box field-span">{error}</div> : null}
+            {error ? <div className="error-box field-span">{error}</div> : null}
 
-          <div className="modal-actions field-span">
-            <button className="ghost-button" type="button" onClick={onClose}>{t.cancel}</button>
-            <button className="primary-button" type="submit" disabled={saving}>
-              {saving ? "…" : t.saveClient}
-            </button>
-          </div>
-        </form>
+            <div className="modal-actions field-span">
+              <button className="ghost-button" type="button" onClick={onClose}>{t.cancel}</button>
+              <button className="primary-button" type="submit" disabled={saving}>
+                {saving ? "…" : t.saveClient}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
@@ -307,7 +317,7 @@ function StatsModal({ open, onClose, stats, t }) {
           </button>
         </div>
 
-        <div className="stats-grid scroll-panel">
+        <div className="stats-grid modal-content-scroll">
           <StatBars title={t.nationalityDistribution} data={mapToArray(stats.nationality_distribution)} />
           <StatBars title={t.ageDistribution} data={mapToArray(stats.age_distribution)} />
           <StatBars title={t.dayLastMonth} data={mapToArray(stats.daily_last_month)} />

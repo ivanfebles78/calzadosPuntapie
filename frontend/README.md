@@ -1,9 +1,9 @@
-# Frontend con roles v8
+# Frontend con roles v9
 
 Cambios:
-- el modal de Nuevo cliente usa exactamente el mismo patrón de scroll que el de Estadísticas
-- el scroll está en el propio modal, no en el fondo
-- el campo Fecha de nacimiento ya no se sale
+- en móvil, el modal de Nuevo cliente pasa a pantalla completa
+- el scroll ocurre solo dentro del contenido del modal
+- Fecha de nacimiento cambia a texto `dd/mm/aaaa` para evitar desbordes en iPhone/Safari
 
 Importante:
-si en Railway ya tienes configurada la URL de producción del backend, conserva tu `src/api.js` actual si ya apunta a producción.
+si en Railway ya tienes configurada la URL de producción del backend, conserva tu `src/api.js` actual.
