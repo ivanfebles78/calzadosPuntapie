@@ -23,7 +23,6 @@ const nationalities = [
 const translations = {
   es: {
     welcome: "Accede a la plataforma de clientes",
-    user: "Usuario",
     password: "Contraseña",
     login: "Entrar",
     loadingLogin: "Entrando…",
@@ -59,7 +58,6 @@ const translations = {
     topBottomHours: "Franja horaria de mayor y menor registro",
     highest: "Mayor",
     lowest: "Menor",
-    noData: "Sin datos",
     newClientTitle: "Nuevo cliente",
     newClientSubtitle: "Recoge los datos del cliente y evita duplicados automáticamente.",
     name: "Nombre",
@@ -70,7 +68,6 @@ const translations = {
   },
   en: {
     welcome: "Access the customer platform",
-    user: "User",
     password: "Password",
     login: "Sign in",
     loadingLogin: "Signing in…",
@@ -106,7 +103,6 @@ const translations = {
     topBottomHours: "Highest and lowest registration time slots",
     highest: "Highest",
     lowest: "Lowest",
-    noData: "No data",
     newClientTitle: "New customer",
     newClientSubtitle: "Collect customer details and avoid duplicates automatically.",
     name: "Name",
@@ -117,7 +113,6 @@ const translations = {
   },
   fr: {
     welcome: "Accédez à la plateforme clients",
-    user: "Utilisateur",
     password: "Mot de passe",
     login: "Entrer",
     loadingLogin: "Connexion…",
@@ -153,7 +148,6 @@ const translations = {
     topBottomHours: "Tranches horaires de plus et moins d’inscriptions",
     highest: "Plus élevé",
     lowest: "Plus faible",
-    noData: "Pas de données",
     newClientTitle: "Nouveau client",
     newClientSubtitle: "Collectez les données du client et évitez automatiquement les doublons.",
     name: "Nom",
@@ -164,7 +158,6 @@ const translations = {
   },
   de: {
     welcome: "Zugriff auf die Kundenplattform",
-    user: "Benutzer",
     password: "Passwort",
     login: "Anmelden",
     loadingLogin: "Anmeldung…",
@@ -200,7 +193,6 @@ const translations = {
     topBottomHours: "Zeitfenster mit den meisten und wenigsten Registrierungen",
     highest: "Höchste",
     lowest: "Niedrigste",
-    noData: "Keine Daten",
     newClientTitle: "Neuer Kunde",
     newClientSubtitle: "Erfassen Sie Kundendaten und vermeiden Sie automatisch Duplikate.",
     name: "Name",
@@ -211,7 +203,6 @@ const translations = {
   },
   ru: {
     welcome: "Вход в платформу клиентов",
-    user: "Пользователь",
     password: "Пароль",
     login: "Войти",
     loadingLogin: "Вход…",
@@ -247,7 +238,6 @@ const translations = {
     topBottomHours: "Часы с максимальной и минимальной регистрацией",
     highest: "Максимум",
     lowest: "Минимум",
-    noData: "Нет данных",
     newClientTitle: "Новый клиент",
     newClientSubtitle: "Соберите данные клиента и автоматически избегайте дублей.",
     name: "Имя",
@@ -277,10 +267,28 @@ function mapToArray(map) {
   return Object.entries(map || {}).map(([label, value]) => ({ label, value }));
 }
 
+function FlagSelector({ language, setLanguage, centered = false }) {
+  return (
+    <div className={centered ? "flags-top" : "flags-inline"}>
+      {flagItems.map((item) => (
+        <button
+          key={item.code}
+          className={`flag-button ${language === item.code ? "active" : ""}`}
+          onClick={() => setLanguage(item.code)}
+          type="button"
+          aria-label={item.label}
+        >
+          <img src={item.image} alt={item.label} />
+          <span>{item.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function StatBars({ title, data }) {
   const items = data ?? [];
   const max = Math.max(...items.map((item) => item.value), 1);
-
   return (
     <div className="chart-card">
       <h3>{title}</h3>
@@ -324,25 +332,6 @@ function SummaryCard({ title, topLabel, topValue, bottomLabel, bottomValue, t })
           <small>{bottomValue}</small>
         </div>
       </div>
-    </div>
-  );
-}
-
-function FlagSelector({ language, setLanguage, centered = false }) {
-  return (
-    <div className={centered ? "flags-top" : "flags-inline"}>
-      {flagItems.map((item) => (
-        <button
-          key={item.code}
-          className={`flag-button ${language === item.code ? "active" : ""}`}
-          onClick={() => setLanguage(item.code)}
-          type="button"
-          aria-label={item.label}
-        >
-          <img src={item.image} alt={item.label} />
-          <span>{item.label}</span>
-        </button>
-      ))}
     </div>
   );
 }
@@ -431,7 +420,7 @@ function CustomerModal({ open, onClose, onSubmit, t }) {
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
+        <div className="modal-header sticky">
           <div>
             <h2>{t.newClientTitle}</h2>
             <p>{t.newClientSubtitle}</p>
@@ -533,7 +522,6 @@ export default function App() {
   const [auth, setAuth] = useState(null);
   const [loginError, setLoginError] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
-
   const [clientes, setClientes] = useState([]);
   const [stats, setStats] = useState(null);
   const [searchInput, setSearchInput] = useState("");
@@ -556,7 +544,6 @@ export default function App() {
     try {
       const clientesData = await getClientes(session.token);
       setClientes(clientesData);
-
       if (session.role === "admin") {
         const statsData = await getStats(session.token);
         setStats(statsData);

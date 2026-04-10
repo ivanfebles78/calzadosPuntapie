@@ -108,19 +108,28 @@ button { cursor: pointer; }
 }
 .empty-state { padding: 42px 12px; text-align: center; color: #e1ebf7; font-size: 1rem; }
 .modal-backdrop {
-  position: fixed; inset: 0; background: rgba(3,10,20,0.82);
-  display: grid; place-items: center; padding: 24px; z-index: 40;
+  position: fixed;
+  inset: 0;
+  background: rgba(3,10,20,0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 40;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .modal-card, .stats-modal-card {
-  width: min(780px, 100%); border-radius: 30px;
+  width: min(780px, 100%);
+  border-radius: 30px;
   background: linear-gradient(180deg, #10203b 0%, #0b1628 100%);
-  border: 2px solid rgba(255,255,255,0.16); box-shadow: var(--shadow);
-}
-.stats-modal-card {
-  width: min(1120px, 100%);
-  max-height: min(88vh, 980px);
+  border: 2px solid rgba(255,255,255,0.16);
+  box-shadow: var(--shadow);
+  max-height: min(90vh, 980px);
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
+.stats-modal-card { width: min(1120px, 100%); }
 .modal-header { display: flex; justify-content: space-between; gap: 16px; padding: 28px 28px 0; }
 .modal-header.sticky {
   position: sticky; top: 0;
@@ -182,6 +191,16 @@ button { cursor: pointer; }
   .search-box { flex-direction: column; }
   .action-buttons, .modal-actions { flex-direction: column; width: 100%; }
   .search-button, .primary-button, .secondary-button, .ghost-button { width: 100%; }
+  .modal-backdrop {
+    align-items: flex-start;
+    padding: 12px;
+  }
+  .modal-card, .stats-modal-card {
+    width: 100%;
+    max-height: calc(100vh - 24px);
+    margin: auto 0;
+  }
   .modal-header, .modal-grid, .stats-grid { padding-left: 18px; padding-right: 18px; }
+  .modal-grid { padding-bottom: 24px; }
   .flags-inline, .flags-top { flex-wrap: wrap; justify-content: center; }
 }
