@@ -1,19 +1,24 @@
-import express from "express";
-import path from "path";
+import express from 'express'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-const app = express();
-const port = process.env.PORT || 8080;
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
-const distPath = path.join(process.cwd(), "frontend", "dist");
+const app = express()
+const PORT = process.env.PORT || 8080
 
-console.log("Serving files from:", distPath);
+// 👇 ESTA ES LA CLAVE
+const distPath = path.join(__dirname, 'frontend', 'dist')
 
-app.use(express.static(distPath));
+console.log("Serving files from:", distPath)
 
-app.get("*", (_req, res) => {
-  res.sendFile(path.join(distPath, "index.html"));
-});
+app.use(express.static(distPath))
 
-app.listen(port, "0.0.0.0", () => {
-  console.log(`Frontend running on port ${port}`);
-});
+app.get('*', (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'))
+})
+
+app.listen(PORT, () => {
+  console.log(`Frontend running on port ${PORT}`)
+})
