@@ -76,8 +76,8 @@ button { cursor: pointer; }
   outline: none;
 }
 .date-input {
-  max-width: 100%;
   width: 100%;
+  max-width: 100%;
   min-width: 0;
   appearance: none;
   -webkit-appearance: none;
@@ -143,17 +143,21 @@ button { cursor: pointer; }
   border: 2px solid rgba(255,255,255,0.16);
   box-shadow: var(--shadow);
   max-height: min(90vh, 980px);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-.stats-modal-card { width: min(1120px, 100%); }
-.modal-scroll-area {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  min-height: 0;
-  flex: 1 1 auto;
+}
+.customer-scroll-card {
+  overflow-y: auto !important;
+}
+.customer-scroll-body {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 24px 28px 28px;
+}
+.stats-modal-card { width: min(1120px, 100%); }
+.scroll-panel {
+  overflow: visible;
 }
 .modal-header { display: flex; justify-content: space-between; gap: 16px; padding: 28px 28px 0; }
 .modal-header.sticky {
@@ -177,7 +181,6 @@ button { cursor: pointer; }
   justify-content: flex-end;
   gap: 12px;
   margin-top: 8px;
-  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 .error-box {
   padding: 14px 16px; border-radius: 18px;
@@ -220,7 +223,7 @@ button { cursor: pointer; }
   .search-box, .action-buttons { width: 100%; }
   .table-head { display: none; }
   .table-row { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
-  .modal-grid, .stats-grid, .summary-grid { grid-template-columns: 1fr; }
+  .modal-grid, .customer-scroll-body, .stats-grid, .summary-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
   .container { width: min(100% - 24px, 1220px); padding-top: 18px; }
@@ -240,7 +243,7 @@ button { cursor: pointer; }
     max-height: calc(100dvh - 24px);
     margin: 0;
   }
-  .modal-header, .modal-grid, .stats-grid { padding-left: 18px; padding-right: 18px; }
-  .modal-grid { padding-bottom: 24px; }
+  .modal-header, .modal-grid, .customer-scroll-body, .stats-grid { padding-left: 18px; padding-right: 18px; }
+  .modal-grid, .customer-scroll-body { padding-bottom: 24px; }
   .flags-inline, .flags-top { flex-wrap: wrap; justify-content: center; }
 }
