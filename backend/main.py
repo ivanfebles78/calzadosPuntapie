@@ -8,7 +8,7 @@ from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
@@ -22,11 +22,7 @@ app = FastAPI(title="Clientes Zapatería API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "https://frontend-production-c2ef.up.railway.app",
-    ],
+    allow_origins=["*"],  # permite cualquier origen (Railway, localhost, etc.)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -57,7 +53,7 @@ class ClienteCreate(BaseModel):
     nombre: str = Field(..., min_length=1, max_length=255)
     fecha_nacimiento: str | None = None
     telefono: str = Field(..., min_length=1, max_length=50)
-    email: EmailStr | None = None
+    email: str | None = None  # acepta cadena vacía o null; se valida/limpia en el endpoint
     nacionalidad: str = "España"
     compra: str | None = None
 
@@ -189,7 +185,10 @@ def crear_cliente(
     user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    existing = check_duplicate(db, cliente.email, cliente.telefono)
+    # Normalizar email: string vacío -> None
+    email_limpio = (cliente.email or "").strip().lower() or None
+
+    existing = check_duplicate(db, email_limpio, cliente.telefono)
     if existing:
         raise HTTPException(
             status_code=400,
@@ -200,7 +199,7 @@ def crear_cliente(
         nombre=cliente.nombre.strip(),
         fecha_nacimiento=(cliente.fecha_nacimiento or "").strip() or None,
         telefono=cliente.telefono.strip(),
-        email=(cliente.email or "").strip().lower() or None,
+        email=email_limpio,
         nacionalidad=cliente.nacionalidad.strip() or "España",
         compra=(cliente.compra or "").strip() or None,
     )
