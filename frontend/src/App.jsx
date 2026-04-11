@@ -185,7 +185,7 @@ function LoginPage({ onLogin, error, loading, language, setLanguage, t }) {
       <div className="login-card">
         <FlagSelector language={language} setLanguage={setLanguage} centered />
         <img src="/images/logo.png" alt="Puntapié" className="login-logo" />
-        <h1>Calzados Puntapié</h1>
+        <h1>Calzados Puntapié SL</h1>
         <p>{t.welcome}</p>
 
         <form onSubmit={submit} className="login-form">
