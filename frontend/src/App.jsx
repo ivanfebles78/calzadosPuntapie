@@ -20,8 +20,6 @@ const nationalities = [
   "Polonia", "Portugal", "Reino Unido", "Rusia", "Suecia", "Suiza", "USA", "OTRO",
 ];
 
-const days = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, "0"));
-
 const translations = {
   es: {
     welcome: "Accede a la plataforma de clientes",
@@ -353,6 +351,95 @@ function mapToArray(map) {
   return Object.entries(map || {}).map(([label, value]) => ({ label, value }));
 }
 
+function getDaysInMonth(monthValue) {
+  const month = Number(monthValue);
+  if (!month) return 31;
+  return new Date(2025, month, 0).getDate();
+}
+
+function getAvailableDays(monthValue) {
+  const totalDays = getDaysInMonth(monthValue);
+  return Array.from({ length: totalDays }, (_, i) =>
+    String(i + 1).padStart(2, "0")
+  );
+}
+
+function useCustomerForm(open) {
+  const [form, setForm] = useState({
+    nombre: "",
+    cumple_dia: "",
+    cumple_mes: "",
+    telefono: "",
+    email: "",
+    nacionalidad: "España",
+    compra: "",
+  });
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setForm({
+        nombre: "",
+        cumple_dia: "",
+        cumple_mes: "",
+        telefono: "",
+        email: "",
+        nacionalidad: "España",
+        compra: "",
+      });
+      setError("");
+      setSaving(false);
+    }
+  }, [open]);
+
+  const availableDays = useMemo(
+    () => getAvailableDays(form.cumple_mes),
+    [form.cumple_mes]
+  );
+
+  useEffect(() => {
+    if (!form.cumple_dia) return;
+    const maxDay = getDaysInMonth(form.cumple_mes);
+    if (Number(form.cumple_dia) > maxDay) {
+      setForm((prev) => ({ ...prev, cumple_dia: "" }));
+    }
+  }, [form.cumple_mes, form.cumple_dia]);
+
+  const handleMonthChange = (value) => {
+    setForm((prev) => {
+      const maxDay = getDaysInMonth(value);
+      const nextDay =
+        prev.cumple_dia && Number(prev.cumple_dia) <= maxDay ? prev.cumple_dia : "";
+      return {
+        ...prev,
+        cumple_mes: value,
+        cumple_dia: nextDay,
+      };
+    });
+  };
+
+  const payload = {
+    ...form,
+    fecha_nacimiento:
+      form.cumple_dia && form.cumple_mes
+        ? `${form.cumple_dia}/${form.cumple_mes}`
+        : "",
+  };
+
+  return {
+    form,
+    setForm,
+    error,
+    setError,
+    saving,
+    setSaving,
+    payload,
+    availableDays,
+    handleMonthChange,
+  };
+}
+
 function FlagSelector({ language, setLanguage, centered = false }) {
   return (
     <div className={centered ? "flags-top" : "flags-inline"}>
@@ -389,7 +476,10 @@ function StatBars({ title, data }) {
                 <strong>{item.value}</strong>
               </div>
               <div className="chart-track">
-                <div className="chart-bar" style={{ width: `${Math.max((item.value / max) * 100, 6)}%` }} />
+                <div
+                  className="chart-bar"
+                  style={{ width: `${Math.max((item.value / max) * 100, 6)}%` }}
+                />
               </div>
             </div>
           ))}
@@ -439,7 +529,9 @@ function LoginPage({ onLogin, error, loading, language, setLanguage, t }) {
         <form onSubmit={submit} className="login-form">
           <select value={username} onChange={(e) => setUsername(e.target.value)}>
             {USERS.map((user) => (
-              <option key={user.value} value={user.value}>{user.label}</option>
+              <option key={user.value} value={user.value}>
+                {user.label}
+              </option>
             ))}
           </select>
           <input
@@ -459,40 +551,19 @@ function LoginPage({ onLogin, error, loading, language, setLanguage, t }) {
 }
 
 function DesktopCustomerModal({ open, onClose, onSubmit, t }) {
-  const [form, setForm] = useState({
-    nombre: "",
-    cumple_dia: "",
-    cumple_mes: "",
-    telefono: "",
-    email: "",
-    nacionalidad: "España",
-    compra: "",
-  });
-  const [error, setError] = useState("");
-  const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (open) {
-      setForm({
-        nombre: "",
-        cumple_dia: "",
-        cumple_mes: "",
-        telefono: "",
-        email: "",
-        nacionalidad: "España",
-        compra: "",
-      });
-      setError("");
-      setSaving(false);
-    }
-  }, [open]);
+  const {
+    form,
+    setForm,
+    error,
+    setError,
+    saving,
+    setSaving,
+    payload,
+    availableDays,
+    handleMonthChange,
+  } = useCustomerForm(open);
 
   if (!open) return null;
-
-  const payload = {
-    ...form,
-    fecha_nacimiento: form.cumple_dia && form.cumple_mes ? `${form.cumple_dia}/${form.cumple_mes}` : "",
-  };
 
   const submit = async (e) => {
     e.preventDefault();
@@ -524,22 +595,36 @@ function DesktopCustomerModal({ open, onClose, onSubmit, t }) {
           <form className="modal-grid" onSubmit={submit}>
             <label className="field">
               <span>{t.name}</span>
-              <input value={form.nombre} required onChange={(e) => setForm({ ...form, nombre: e.target.value })} />
+              <input
+                value={form.nombre}
+                required
+                onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+              />
             </label>
 
             <div className="field">
               <span>{t.birthday}</span>
               <div className="birthday-row">
-                <select value={form.cumple_dia} onChange={(e) => setForm({ ...form, cumple_dia: e.target.value })}>
+                <select
+                  value={form.cumple_dia}
+                  onChange={(e) => setForm({ ...form, cumple_dia: e.target.value })}
+                >
                   <option value="">{t.birthdayDay}</option>
-                  {days.map((day) => (
-                    <option key={day} value={day}>{day}</option>
+                  {availableDays.map((day) => (
+                    <option key={day} value={day}>
+                      {day}
+                    </option>
                   ))}
                 </select>
-                <select value={form.cumple_mes} onChange={(e) => setForm({ ...form, cumple_mes: e.target.value })}>
+                <select
+                  value={form.cumple_mes}
+                  onChange={(e) => handleMonthChange(e.target.value)}
+                >
                   <option value="">{t.birthdayMonth}</option>
                   {t.months.map((month) => (
-                    <option key={month.value} value={month.value}>{month.label}</option>
+                    <option key={month.value} value={month.value}>
+                      {month.label}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -547,29 +632,48 @@ function DesktopCustomerModal({ open, onClose, onSubmit, t }) {
 
             <label className="field">
               <span>{t.phone}</span>
-              <input value={form.telefono} required onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
+              <input
+                value={form.telefono}
+                required
+                onChange={(e) => setForm({ ...form, telefono: e.target.value })}
+              />
             </label>
             <label className="field">
               <span>{t.email}</span>
-              <input type="email" value={form.email} required onChange={(e) => setForm({ ...form, email: e.target.value })} />
+              <input
+                type="email"
+                value={form.email}
+                required
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
             </label>
             <label className="field">
               <span>{t.nationality}</span>
-              <select value={form.nacionalidad} onChange={(e) => setForm({ ...form, nacionalidad: e.target.value })}>
+              <select
+                value={form.nacionalidad}
+                onChange={(e) => setForm({ ...form, nacionalidad: e.target.value })}
+              >
                 {nationalities.map((item) => (
-                  <option key={item} value={item}>{item}</option>
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
                 ))}
               </select>
             </label>
             <label className="field field-span">
               <span>{t.purchase}</span>
-              <input value={form.compra} onChange={(e) => setForm({ ...form, compra: e.target.value })} />
+              <input
+                value={form.compra}
+                onChange={(e) => setForm({ ...form, compra: e.target.value })}
+              />
             </label>
 
             {error ? <div className="error-box field-span">{error}</div> : null}
 
             <div className="modal-actions field-span">
-              <button className="ghost-button" type="button" onClick={onClose}>{t.cancel}</button>
+              <button className="ghost-button" type="button" onClick={onClose}>
+                {t.cancel}
+              </button>
               <button className="primary-button" type="submit" disabled={saving}>
                 {saving ? "…" : t.saveClient}
               </button>
@@ -582,40 +686,19 @@ function DesktopCustomerModal({ open, onClose, onSubmit, t }) {
 }
 
 function MobileCustomerScreen({ open, onClose, onSubmit, t }) {
-  const [form, setForm] = useState({
-    nombre: "",
-    cumple_dia: "",
-    cumple_mes: "",
-    telefono: "",
-    email: "",
-    nacionalidad: "España",
-    compra: "",
-  });
-  const [error, setError] = useState("");
-  const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (open) {
-      setForm({
-        nombre: "",
-        cumple_dia: "",
-        cumple_mes: "",
-        telefono: "",
-        email: "",
-        nacionalidad: "España",
-        compra: "",
-      });
-      setError("");
-      setSaving(false);
-    }
-  }, [open]);
+  const {
+    form,
+    setForm,
+    error,
+    setError,
+    saving,
+    setSaving,
+    payload,
+    availableDays,
+    handleMonthChange,
+  } = useCustomerForm(open);
 
   if (!open) return null;
-
-  const payload = {
-    ...form,
-    fecha_nacimiento: form.cumple_dia && form.cumple_mes ? `${form.cumple_dia}/${form.cumple_mes}` : "",
-  };
 
   const submit = async (e) => {
     e.preventDefault();
@@ -637,28 +720,44 @@ function MobileCustomerScreen({ open, onClose, onSubmit, t }) {
           <h2>{t.newClientTitle}</h2>
           <p>{t.newClientSubtitle}</p>
         </div>
-        <button className="ghost-button" type="button" onClick={onClose}>{t.cancel}</button>
+        <button className="ghost-button" type="button" onClick={onClose}>
+          {t.cancel}
+        </button>
       </div>
 
       <form className="customer-screen__body" onSubmit={submit}>
         <label className="field">
           <span>{t.name}</span>
-          <input value={form.nombre} required onChange={(e) => setForm({ ...form, nombre: e.target.value })} />
+          <input
+            value={form.nombre}
+            required
+            onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+          />
         </label>
 
         <div className="field">
           <span>{t.birthday}</span>
           <div className="birthday-row mobile-birthday-row">
-            <select value={form.cumple_dia} onChange={(e) => setForm({ ...form, cumple_dia: e.target.value })}>
+            <select
+              value={form.cumple_dia}
+              onChange={(e) => setForm({ ...form, cumple_dia: e.target.value })}
+            >
               <option value="">{t.birthdayDay}</option>
-              {days.map((day) => (
-                <option key={day} value={day}>{day}</option>
+              {availableDays.map((day) => (
+                <option key={day} value={day}>
+                  {day}
+                </option>
               ))}
             </select>
-            <select value={form.cumple_mes} onChange={(e) => setForm({ ...form, cumple_mes: e.target.value })}>
+            <select
+              value={form.cumple_mes}
+              onChange={(e) => handleMonthChange(e.target.value)}
+            >
               <option value="">{t.birthdayMonth}</option>
               {t.months.map((month) => (
-                <option key={month.value} value={month.value}>{month.label}</option>
+                <option key={month.value} value={month.value}>
+                  {month.label}
+                </option>
               ))}
             </select>
           </div>
@@ -666,32 +765,51 @@ function MobileCustomerScreen({ open, onClose, onSubmit, t }) {
 
         <label className="field">
           <span>{t.phone}</span>
-          <input value={form.telefono} required onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
+          <input
+            value={form.telefono}
+            required
+            onChange={(e) => setForm({ ...form, telefono: e.target.value })}
+          />
         </label>
 
         <label className="field">
           <span>{t.email}</span>
-          <input type="email" value={form.email} required onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          <input
+            type="email"
+            value={form.email}
+            required
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+          />
         </label>
 
         <label className="field">
           <span>{t.nationality}</span>
-          <select value={form.nacionalidad} onChange={(e) => setForm({ ...form, nacionalidad: e.target.value })}>
+          <select
+            value={form.nacionalidad}
+            onChange={(e) => setForm({ ...form, nacionalidad: e.target.value })}
+          >
             {nationalities.map((item) => (
-              <option key={item} value={item}>{item}</option>
+              <option key={item} value={item}>
+                {item}
+              </option>
             ))}
           </select>
         </label>
 
         <label className="field">
           <span>{t.purchase}</span>
-          <input value={form.compra} onChange={(e) => setForm({ ...form, compra: e.target.value })} />
+          <input
+            value={form.compra}
+            onChange={(e) => setForm({ ...form, compra: e.target.value })}
+          />
         </label>
 
         {error ? <div className="error-box">{error}</div> : null}
 
         <div className="customer-screen__footer">
-          <button className="ghost-button" type="button" onClick={onClose}>{t.cancel}</button>
+          <button className="ghost-button" type="button" onClick={onClose}>
+            {t.cancel}
+          </button>
           <button className="primary-button" type="submit" disabled={saving}>
             {saving ? "…" : t.saveClient}
           </button>
@@ -718,10 +836,22 @@ function StatsModal({ open, onClose, stats, t }) {
         </div>
 
         <div className="stats-grid modal-content-scroll">
-          <StatBars title={t.nationalityDistribution} data={mapToArray(stats.nationality_distribution)} />
-          <StatBars title={t.ageDistribution} data={mapToArray(stats.age_distribution)} />
-          <StatBars title={t.dayLastMonth} data={mapToArray(stats.daily_last_month)} />
-          <StatBars title={t.monthLastYear} data={mapToArray(stats.monthly_last_year)} />
+          <StatBars
+            title={t.nationalityDistribution}
+            data={mapToArray(stats.nationality_distribution)}
+          />
+          <StatBars
+            title={t.ageDistribution}
+            data={mapToArray(stats.age_distribution)}
+          />
+          <StatBars
+            title={t.dayLastMonth}
+            data={mapToArray(stats.daily_last_month)}
+          />
+          <StatBars
+            title={t.monthLastYear}
+            data={mapToArray(stats.monthly_last_year)}
+          />
           <SummaryCard
             title={t.topBottomDays}
             topLabel={stats.top_day?.label || "—"}
@@ -887,11 +1017,14 @@ export default function App() {
                 <FlagSelector language={language} setLanguage={setLanguage} />
                 <h1>Clientes Puntapié</h1>
                 <p>
-                  {t.sessionAs} <strong>{auth.username}</strong> · {t.role} <strong>{auth.role}</strong>
+                  {t.sessionAs} <strong>{auth.username}</strong> · {t.role}{" "}
+                  <strong>{auth.role}</strong>
                 </p>
               </div>
             </div>
-            <button className="ghost-button" onClick={() => setAuth(null)}>{t.logout}</button>
+            <button className="ghost-button" onClick={() => setAuth(null)}>
+              {t.logout}
+            </button>
           </div>
 
           <div className="hero-actions">
@@ -902,21 +1035,35 @@ export default function App() {
                 onKeyDown={(e) => e.key === "Enter" && setActiveSearch(searchInput)}
                 placeholder={t.search}
               />
-              <button className="search-button" onClick={() => setActiveSearch(searchInput)} type="button">
+              <button
+                className="search-button"
+                onClick={() => setActiveSearch(searchInput)}
+                type="button"
+              >
                 {t.searchButton}
               </button>
-              <button className="search-button secondary-light" onClick={clearSearch} type="button">
+              <button
+                className="search-button secondary-light"
+                onClick={clearSearch}
+                type="button"
+              >
                 {t.clearButton}
               </button>
             </div>
 
             <div className="action-buttons">
-              <button className="primary-button" onClick={() => setShowCustomerModal(true)}>
+              <button
+                className="primary-button"
+                onClick={() => setShowCustomerModal(true)}
+              >
                 {t.newClient}
               </button>
               {auth.role === "admin" ? (
                 <>
-                  <button className="secondary-button" onClick={() => setShowStatsModal(true)}>
+                  <button
+                    className="secondary-button"
+                    onClick={() => setShowStatsModal(true)}
+                  >
                     {t.statistics}
                   </button>
                   <button className="secondary-button" onClick={handleExport}>
