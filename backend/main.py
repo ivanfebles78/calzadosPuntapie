@@ -4,7 +4,7 @@ import re
 from uuid import uuid4
 
 import pandas as pd
-from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -41,6 +41,7 @@ USERS = {
 TOKENS = {}
 security = HTTPBearer()
 
+
 class LoginRequest(BaseModel):
     username: str
     password: str
@@ -66,7 +67,7 @@ class ClienteResponse(BaseModel):
     nombre: str
     fecha_nacimiento: str | None
     telefono: str
-    email: str
+    email: str | None
     nacionalidad: str
     compra: str | None
     created_at: datetime
@@ -90,7 +91,6 @@ def normalize_phone(phone: str) -> str:
 def check_duplicate(db: Session, email: str | None, telefono: str):
     normalized_phone = normalize_phone(telefono)
     clientes = db.query(models.Cliente).all()
-
     normalized_email = (email or "").strip().lower()
 
     for cliente in clientes:
@@ -121,6 +121,10 @@ def require_admin(user=Depends(get_current_user)):
 def parse_birth_to_age(date_str: str | None):
     if not date_str:
         return None
+
+    if re.fullmatch(r"\d{2}/\d{2}", date_str or ""):
+        return None
+
     try:
         birth = datetime.fromisoformat(date_str)
     except ValueError:
@@ -128,6 +132,7 @@ def parse_birth_to_age(date_str: str | None):
             birth = datetime.strptime(date_str, "%Y-%m-%d")
         except ValueError:
             return None
+
     today = datetime.utcnow()
     age = today.year - birth.year - ((today.month, today.day) < (birth.month, birth.day))
     if age < 0 or age > 120:
@@ -193,7 +198,7 @@ def crear_cliente(
 
     nuevo = models.Cliente(
         nombre=cliente.nombre.strip(),
-        fecha_nacimiento=cliente.fecha_nacimiento,
+        fecha_nacimiento=(cliente.fecha_nacimiento or "").strip() or None,
         telefono=cliente.telefono.strip(),
         email=(cliente.email or "").strip().lower() or None,
         nacionalidad=cliente.nacionalidad.strip() or "España",
@@ -237,7 +242,6 @@ def estadisticas(
     clientes = db.query(models.Cliente).all()
     now = datetime.utcnow()
     last_month_start = now - timedelta(days=29)
-    last_year_start = now.replace(day=1) - timedelta(days=364)
 
     nationality_distribution = {}
     age_distribution = {}
@@ -376,13 +380,17 @@ async def importar_excel(
     for _, row in df.iterrows():
         nombre = str(row.get("nombre", "")).strip()
         telefono = str(row.get("telefono", "")).strip()
-        email = str(row.get("email", "")).strip().lower()
 
-        if not nombre or not telefono or not email:
+        raw_email = row.get("email", "")
+        email = ""
+        if pd.notna(raw_email):
+            email = str(raw_email).strip().lower()
+
+        if not nombre or not telefono:
             skipped += 1
             continue
 
-        existing = check_duplicate(db, email, telefono)
+        existing = check_duplicate(db, email or None, telefono)
         if existing:
             skipped += 1
             continue
@@ -391,7 +399,7 @@ async def importar_excel(
             nombre=nombre,
             fecha_nacimiento=str(row.get("fecha_nacimiento", "")).strip() or None,
             telefono=telefono,
-            email=email,
+            email=email or None,
             nacionalidad=str(row.get("nacionalidad", "España")).strip() or "España",
             compra=str(row.get("compra", "")).strip() or None,
         )
@@ -405,7 +413,8 @@ async def importar_excel(
         "insertados": inserted,
         "omitidos": skipped,
     }
-    
+
+
 @app.delete("/admin/reset-clientes")
 def reset_clientes(
     user=Depends(require_admin),
