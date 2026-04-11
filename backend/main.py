@@ -55,7 +55,7 @@ class ClienteCreate(BaseModel):
     nombre: str = Field(..., min_length=1, max_length=255)
     fecha_nacimiento: str | None = None
     telefono: str = Field(..., min_length=1, max_length=50)
-    email: EmailStr
+    email: EmailStr | None = None
     nacionalidad: str = "España"
     compra: str | None = None
 
@@ -86,12 +86,15 @@ def normalize_phone(phone: str) -> str:
     return re.sub(r"\D", "", phone or "").strip()
 
 
-def check_duplicate(db: Session, email: str, telefono: str):
+def check_duplicate(db: Session, email: str | None, telefono: str):
     normalized_phone = normalize_phone(telefono)
     clientes = db.query(models.Cliente).all()
 
+    normalized_email = (email or "").strip().lower()
+
     for cliente in clientes:
-        same_email = (cliente.email or "").strip().lower() == email.strip().lower()
+        existing_email = (cliente.email or "").strip().lower()
+        same_email = bool(normalized_email) and existing_email == normalized_email
         same_phone = normalize_phone(cliente.telefono) == normalized_phone
         if same_email or same_phone:
             return cliente
@@ -192,7 +195,7 @@ def crear_cliente(
         nombre=cliente.nombre.strip(),
         fecha_nacimiento=cliente.fecha_nacimiento,
         telefono=cliente.telefono.strip(),
-        email=cliente.email.strip().lower(),
+        email=(cliente.email or "").strip().lower() or None,
         nacionalidad=cliente.nacionalidad.strip() or "España",
         compra=(cliente.compra or "").strip() or None,
     )

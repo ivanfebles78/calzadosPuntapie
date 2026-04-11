@@ -643,7 +643,6 @@ function DesktopCustomerModal({ open, onClose, onSubmit, t }) {
               <input
                 type="email"
                 value={form.email}
-                required
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
               />
             </label>
@@ -777,7 +776,6 @@ function MobileCustomerScreen({ open, onClose, onSubmit, t }) {
           <input
             type="email"
             value={form.email}
-            required
             onChange={(e) => setForm({ ...form, email: e.target.value })}
           />
         </label>
