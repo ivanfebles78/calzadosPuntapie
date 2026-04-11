@@ -419,13 +419,17 @@ function useCustomerForm(open) {
     });
   };
 
-  const payload = {
-    ...form,
-    fecha_nacimiento:
-      form.cumple_dia && form.cumple_mes
-        ? `${form.cumple_dia}/${form.cumple_mes}`
-        : "",
-  };
+	const payload = {
+	  ...form,
+	  nombre: (form.nombre || "").trim(),
+	  telefono: (form.telefono || "").trim(),
+	  email: (form.email || "").trim() || null,
+	  compra: (form.compra || "").trim() || null,
+	  fecha_nacimiento:
+		form.cumple_dia && form.cumple_mes
+		  ? `${form.cumple_dia}/${form.cumple_mes}`
+		  : null,
+	};
 
   return {
     form,
