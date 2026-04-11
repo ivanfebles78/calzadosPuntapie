@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
-from sqlalchemy import or_
+from sqlalchemy import or_, text
 from sqlalchemy.orm import Session
 
 import models
@@ -18,12 +18,50 @@ from database import SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
 
+# ── Migración automática: asegura que email admite NULL en la BD existente ──
+def run_migrations():
+    """SQLite no soporta ALTER COLUMN, así que recreamos la tabla si email no admite NULL."""
+    try:
+        with engine.connect() as conn:
+            # Comprobamos el esquema actual de la tabla
+            result = conn.execute(text("PRAGMA table_info(clientes)")).fetchall()
+            for col in result:
+                # col = (cid, name, type, notnull, dflt_value, pk)
+                if col[1] == "email" and col[3] == 1:  # notnull == 1
+                    # Email tiene NOT NULL — hay que recrear la tabla
+                    conn.execute(text("""
+                        CREATE TABLE IF NOT EXISTS clientes_new (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            nombre VARCHAR(255) NOT NULL,
+                            fecha_nacimiento VARCHAR(50),
+                            telefono VARCHAR(50) NOT NULL,
+                            email VARCHAR(255),
+                            nacionalidad VARCHAR(100) NOT NULL DEFAULT 'España',
+                            compra VARCHAR(255),
+                            created_at DATETIME NOT NULL
+                        )
+                    """))
+                    conn.execute(text("""
+                        INSERT INTO clientes_new
+                        SELECT id, nombre, fecha_nacimiento, telefono, email,
+                               nacionalidad, compra, created_at
+                        FROM clientes
+                    """))
+                    conn.execute(text("DROP TABLE clientes"))
+                    conn.execute(text("ALTER TABLE clientes_new RENAME TO clientes"))
+                    conn.commit()
+                    break
+    except Exception as e:
+        print(f"Migration warning: {e}")
+
+run_migrations()
+
 app = FastAPI(title="Clientes Zapatería API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # permite cualquier origen (Railway, localhost, etc.)
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -53,7 +91,7 @@ class ClienteCreate(BaseModel):
     nombre: str = Field(..., min_length=1, max_length=255)
     fecha_nacimiento: str | None = None
     telefono: str = Field(..., min_length=1, max_length=50)
-    email: str | None = None  # acepta cadena vacía o null; se valida/limpia en el endpoint
+    email: str | None = None
     nacionalidad: str = "España"
     compra: str | None = None
 
@@ -185,7 +223,7 @@ def crear_cliente(
     user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    # Normalizar email: string vacío -> None
+    # Normalizar email: string vacío o null -> None
     email_limpio = (cliente.email or "").strip().lower() or None
 
     existing = check_duplicate(db, email_limpio, cliente.telefono)
@@ -358,14 +396,7 @@ async def importar_excel(
     contents = await file.read()
     df = pd.read_excel(BytesIO(contents))
 
-    required_columns = {
-        "nombre",
-        "fecha_nacimiento",
-        "telefono",
-        "email",
-        "nacionalidad",
-        "compra",
-    }
+    required_columns = {"nombre", "fecha_nacimiento", "telefono", "email", "nacionalidad", "compra"}
     missing = required_columns - set(df.columns)
     if missing:
         raise HTTPException(
@@ -406,12 +437,7 @@ async def importar_excel(
         inserted += 1
 
     db.commit()
-
-    return {
-        "message": "Importación completada",
-        "insertados": inserted,
-        "omitidos": skipped,
-    }
+    return {"message": "Importación completada", "insertados": inserted, "omitidos": skipped}
 
 
 @app.delete("/admin/reset-clientes")
