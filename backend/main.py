@@ -7,6 +7,7 @@ import pandas as pd
 from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
@@ -38,7 +39,7 @@ USERS = {
 }
 
 TOKENS = {}
-
+security = HTTPBearer()
 
 class LoginRequest(BaseModel):
     username: str
@@ -101,11 +102,10 @@ def check_duplicate(db: Session, email: str | None, telefono: str):
     return None
 
 
-def get_current_user(authorization: str | None = Header(default=None)):
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="No autenticado")
-
-    token = authorization.replace("Bearer ", "").strip()
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+):
+    token = credentials.credentials
     user = TOKENS.get(token)
     if not user:
         raise HTTPException(status_code=401, detail="Token inválido")
