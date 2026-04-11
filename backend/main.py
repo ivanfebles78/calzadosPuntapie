@@ -406,11 +406,11 @@ async def importar_excel(
         "omitidos": skipped,
     }
     
-    @app.delete("/admin/reset-clientes")
-    def reset_clientes(
-        user=Depends(require_admin),
-        db: Session = Depends(get_db),
-    ):
-        db.query(models.Cliente).delete()
-        db.commit()
-        return {"message": "Todos los clientes han sido eliminados"}
+@app.delete("/admin/reset-clientes")
+def reset_clientes(
+    user=Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    db.query(models.Cliente).delete()
+    db.commit()
+    return {"message": "Todos los clientes han sido eliminados"}
