@@ -1,6 +1,5 @@
 const API_URL = "https://calzadospuntapie-production.up.railway.app";
 
-
 function getHeaders(token, extra = {}) {
   return {
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -14,9 +13,7 @@ async function handleResponse(response) {
     try {
       const data = await response.json();
       message = data.detail || message;
-    } catch {
-      // ignore
-    }
+    } catch { }
     throw new Error(message);
   }
   const contentType = response.headers.get("content-type") || "";
@@ -49,6 +46,23 @@ export async function createCliente(token, cliente) {
   return handleResponse(response);
 }
 
+export async function updateCliente(token, id, cliente) {
+  const response = await fetch(`${API_URL}/clientes/${id}`, {
+    method: "PUT",
+    headers: getHeaders(token, { "Content-Type": "application/json" }),
+    body: JSON.stringify(cliente),
+  });
+  return handleResponse(response);
+}
+
+export async function deleteCliente(token, id) {
+  const response = await fetch(`${API_URL}/clientes/${id}`, {
+    method: "DELETE",
+    headers: getHeaders(token),
+  });
+  return handleResponse(response);
+}
+
 export async function getStats(token) {
   const response = await fetch(`${API_URL}/estadisticas`, {
     headers: getHeaders(token),
@@ -65,9 +79,7 @@ export async function exportExcel(token) {
     try {
       const data = await response.json();
       message = data.detail || message;
-    } catch {
-      // ignore
-    }
+    } catch { }
     throw new Error(message);
   }
   return response.blob();

@@ -18,17 +18,12 @@ from database import SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
 
-# ── Migración automática: asegura que email admite NULL en la BD existente ──
 def run_migrations():
-    """SQLite no soporta ALTER COLUMN, así que recreamos la tabla si email no admite NULL."""
     try:
         with engine.connect() as conn:
-            # Comprobamos el esquema actual de la tabla
             result = conn.execute(text("PRAGMA table_info(clientes)")).fetchall()
             for col in result:
-                # col = (cid, name, type, notnull, dflt_value, pk)
-                if col[1] == "email" and col[3] == 1:  # notnull == 1
-                    # Email tiene NOT NULL — hay que recrear la tabla
+                if col[1] == "email" and col[3] == 1:
                     conn.execute(text("""
                         CREATE TABLE IF NOT EXISTS clientes_new (
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -41,12 +36,7 @@ def run_migrations():
                             created_at DATETIME NOT NULL
                         )
                     """))
-                    conn.execute(text("""
-                        INSERT INTO clientes_new
-                        SELECT id, nombre, fecha_nacimiento, telefono, email,
-                               nacionalidad, compra, created_at
-                        FROM clientes
-                    """))
+                    conn.execute(text("INSERT INTO clientes_new SELECT id, nombre, fecha_nacimiento, telefono, email, nacionalidad, compra, created_at FROM clientes"))
                     conn.execute(text("DROP TABLE clientes"))
                     conn.execute(text("ALTER TABLE clientes_new RENAME TO clientes"))
                     conn.commit()
@@ -80,12 +70,10 @@ class LoginRequest(BaseModel):
     username: str
     password: str
 
-
 class LoginResponse(BaseModel):
     token: str
     username: str
     role: str
-
 
 class ClienteCreate(BaseModel):
     nombre: str = Field(..., min_length=1, max_length=255)
@@ -95,6 +83,13 @@ class ClienteCreate(BaseModel):
     nacionalidad: str = "España"
     compra: str | None = None
 
+class ClienteUpdate(BaseModel):
+    nombre: str = Field(..., min_length=1, max_length=255)
+    fecha_nacimiento: str | None = None
+    telefono: str = Field(..., min_length=1, max_length=50)
+    email: str | None = None
+    nacionalidad: str = "España"
+    compra: str | None = None
 
 class ClienteResponse(BaseModel):
     id: int
@@ -117,17 +112,16 @@ def get_db():
     finally:
         db.close()
 
-
 def normalize_phone(phone: str) -> str:
     return re.sub(r"\D", "", phone or "").strip()
 
-
-def check_duplicate(db: Session, email: str | None, telefono: str):
+def check_duplicate(db: Session, email: str | None, telefono: str, exclude_id: int | None = None):
     normalized_phone = normalize_phone(telefono)
     clientes = db.query(models.Cliente).all()
     normalized_email = (email or "").strip().lower()
-
     for cliente in clientes:
+        if exclude_id and cliente.id == exclude_id:
+            continue
         existing_email = (cliente.email or "").strip().lower()
         same_email = bool(normalized_email) and existing_email == normalized_email
         same_phone = normalize_phone(cliente.telefono) == normalized_phone
@@ -135,30 +129,23 @@ def check_duplicate(db: Session, email: str | None, telefono: str):
             return cliente
     return None
 
-
-def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-):
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     token = credentials.credentials
     user = TOKENS.get(token)
     if not user:
         raise HTTPException(status_code=401, detail="Token inválido")
     return user
 
-
 def require_admin(user=Depends(get_current_user)):
     if user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Solo admin")
     return user
 
-
 def parse_birth_to_age(date_str: str | None):
     if not date_str:
         return None
-
     if re.fullmatch(r"\d{2}/\d{2}", date_str or ""):
         return None
-
     try:
         birth = datetime.fromisoformat(date_str)
     except ValueError:
@@ -166,29 +153,20 @@ def parse_birth_to_age(date_str: str | None):
             birth = datetime.strptime(date_str, "%Y-%m-%d")
         except ValueError:
             return None
-
     today = datetime.utcnow()
     age = today.year - birth.year - ((today.month, today.day) < (birth.month, birth.day))
     if age < 0 or age > 120:
         return None
     return age
 
-
 def age_bucket(age: int | None):
-    if age is None:
-        return "Sin fecha"
-    if age < 18:
-        return "<18"
-    if age <= 24:
-        return "18-24"
-    if age <= 34:
-        return "25-34"
-    if age <= 44:
-        return "35-44"
-    if age <= 54:
-        return "45-54"
-    if age <= 64:
-        return "55-64"
+    if age is None: return "Sin fecha"
+    if age < 18: return "<18"
+    if age <= 24: return "18-24"
+    if age <= 34: return "25-34"
+    if age <= 44: return "35-44"
+    if age <= 54: return "45-54"
+    if age <= 64: return "55-64"
     return "65+"
 
 
@@ -196,43 +174,26 @@ def age_bucket(age: int | None):
 def health():
     return {"status": "ok"}
 
-
 @app.post("/login", response_model=LoginResponse)
 def login(payload: LoginRequest):
     username = payload.username.strip().lower()
     user = USERS.get(username)
     if not user or user["password"] != payload.password:
         raise HTTPException(status_code=401, detail="Usuario o contraseña incorrectos")
-
     token = str(uuid4())
     TOKENS[token] = {"username": username, "role": user["role"]}
     return {"token": token, "username": username, "role": user["role"]}
 
-
 @app.get("/clientes", response_model=list[ClienteResponse])
-def obtener_clientes(
-    user=Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
+def obtener_clientes(user=Depends(get_current_user), db: Session = Depends(get_db)):
     return db.query(models.Cliente).order_by(models.Cliente.created_at.desc()).all()
 
-
 @app.post("/clientes", response_model=ClienteResponse)
-def crear_cliente(
-    cliente: ClienteCreate,
-    user=Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    # Normalizar email: string vacío o null -> None
+def crear_cliente(cliente: ClienteCreate, user=Depends(get_current_user), db: Session = Depends(get_db)):
     email_limpio = (cliente.email or "").strip().lower() or None
-
     existing = check_duplicate(db, email_limpio, cliente.telefono)
     if existing:
-        raise HTTPException(
-            status_code=400,
-            detail="Ya existe un cliente registrado con ese email o teléfono.",
-        )
-
+        raise HTTPException(status_code=400, detail="Ya existe un cliente registrado con ese email o teléfono.")
     nuevo = models.Cliente(
         nombre=cliente.nombre.strip(),
         fecha_nacimiento=(cliente.fecha_nacimiento or "").strip() or None,
@@ -246,53 +207,65 @@ def crear_cliente(
     db.refresh(nuevo)
     return nuevo
 
+@app.put("/clientes/{cliente_id}", response_model=ClienteResponse)
+def actualizar_cliente(cliente_id: int, cliente: ClienteUpdate, user=Depends(require_admin), db: Session = Depends(get_db)):
+    existing_record = db.query(models.Cliente).filter(models.Cliente.id == cliente_id).first()
+    if not existing_record:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado.")
+    email_limpio = (cliente.email or "").strip().lower() or None
+    duplicate = check_duplicate(db, email_limpio, cliente.telefono, exclude_id=cliente_id)
+    if duplicate:
+        raise HTTPException(status_code=400, detail="Ya existe otro cliente con ese email o teléfono.")
+    existing_record.nombre = cliente.nombre.strip()
+    existing_record.fecha_nacimiento = (cliente.fecha_nacimiento or "").strip() or None
+    existing_record.telefono = cliente.telefono.strip()
+    existing_record.email = email_limpio
+    existing_record.nacionalidad = cliente.nacionalidad.strip() or "España"
+    existing_record.compra = (cliente.compra or "").strip() or None
+    db.commit()
+    db.refresh(existing_record)
+    return existing_record
+
+@app.delete("/clientes/{cliente_id}")
+def eliminar_cliente(cliente_id: int, user=Depends(require_admin), db: Session = Depends(get_db)):
+    cliente = db.query(models.Cliente).filter(models.Cliente.id == cliente_id).first()
+    if not cliente:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado.")
+    db.delete(cliente)
+    db.commit()
+    return {"message": "Cliente eliminado correctamente."}
 
 @app.get("/clientes/buscar", response_model=list[ClienteResponse])
-def buscar_clientes(
-    q: str = "",
-    user=Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
+def buscar_clientes(q: str = "", user=Depends(get_current_user), db: Session = Depends(get_db)):
     q = q.strip()
     if not q:
         return db.query(models.Cliente).order_by(models.Cliente.created_at.desc()).all()
-
     return (
         db.query(models.Cliente)
-        .filter(
-            or_(
-                models.Cliente.nombre.ilike(f"%{q}%"),
-                models.Cliente.email.ilike(f"%{q}%"),
-                models.Cliente.telefono.ilike(f"%{q}%"),
-            )
-        )
+        .filter(or_(
+            models.Cliente.nombre.ilike(f"%{q}%"),
+            models.Cliente.email.ilike(f"%{q}%"),
+            models.Cliente.telefono.ilike(f"%{q}%"),
+        ))
         .order_by(models.Cliente.created_at.desc())
         .all()
     )
 
-
 @app.get("/estadisticas")
-def estadisticas(
-    user=Depends(require_admin),
-    db: Session = Depends(get_db),
-):
+def estadisticas(user=Depends(require_admin), db: Session = Depends(get_db)):
     clientes = db.query(models.Cliente).all()
     now = datetime.utcnow()
     last_month_start = now - timedelta(days=29)
-
     nationality_distribution = {}
     age_distribution = {}
     daily_last_month = {}
     monthly_last_year = {}
     weekday_counts = {}
     hour_counts = {}
-
     weekdays = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
-
     for i in range(30):
         d = (last_month_start + timedelta(days=i)).date()
         daily_last_month[d.isoformat()] = 0
-
     cursor = datetime(now.year, now.month, 1)
     month_keys = []
     for _ in range(12):
@@ -304,38 +277,30 @@ def estadisticas(
         else:
             cursor = cursor.replace(month=cursor.month - 1)
     month_keys = sorted(month_keys)
-
     for hour in range(24):
         hour_counts[f"{hour:02d}:00"] = 0
     for day in weekdays:
         weekday_counts[day] = 0
-
     for cliente in clientes:
         created = cliente.created_at
         nationality = (cliente.nacionalidad or "Sin dato").strip()
         nationality_distribution[nationality] = nationality_distribution.get(nationality, 0) + 1
-
         age = parse_birth_to_age(cliente.fecha_nacimiento)
         bucket = age_bucket(age)
         age_distribution[bucket] = age_distribution.get(bucket, 0) + 1
-
         if created.date() >= last_month_start.date():
             key = created.date().isoformat()
             daily_last_month[key] = daily_last_month.get(key, 0) + 1
-
         month_key = f"{created.year}-{created.month:02d}"
         if month_key in monthly_last_year:
             monthly_last_year[month_key] += 1
-
         weekday_name = weekdays[created.weekday()]
         weekday_counts[weekday_name] += 1
         hour_counts[f"{created.hour:02d}:00"] += 1
-
     max_day = max(weekday_counts.items(), key=lambda x: x[1]) if weekday_counts else ("—", 0)
     min_day = min(weekday_counts.items(), key=lambda x: x[1]) if weekday_counts else ("—", 0)
     max_hour = max(hour_counts.items(), key=lambda x: x[1]) if hour_counts else ("—", 0)
     min_hour = min(hour_counts.items(), key=lambda x: x[1]) if hour_counts else ("—", 0)
-
     return {
         "total_clientes": len(clientes),
         "nationality_distribution": nationality_distribution,
@@ -350,101 +315,54 @@ def estadisticas(
         "bottom_hour": {"label": min_hour[0], "value": min_hour[1]},
     }
 
-
 @app.get("/exportar-excel")
-def exportar_excel(
-    user=Depends(require_admin),
-    db: Session = Depends(get_db),
-):
+def exportar_excel(user=Depends(require_admin), db: Session = Depends(get_db)):
     clientes = db.query(models.Cliente).order_by(models.Cliente.created_at.desc()).all()
-    rows = [
-        {
-            "id": c.id,
-            "nombre": c.nombre,
-            "fecha_nacimiento": c.fecha_nacimiento,
-            "telefono": c.telefono,
-            "email": c.email,
-            "nacionalidad": c.nacionalidad,
-            "compra": c.compra,
-            "created_at": c.created_at.isoformat(),
-        }
-        for c in clientes
-    ]
-
+    rows = [{"id": c.id, "nombre": c.nombre, "fecha_nacimiento": c.fecha_nacimiento, "telefono": c.telefono, "email": c.email, "nacionalidad": c.nacionalidad, "compra": c.compra, "created_at": c.created_at.isoformat()} for c in clientes]
     df = pd.DataFrame(rows)
     output = BytesIO()
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
         df.to_excel(writer, index=False, sheet_name="clientes")
-
     output.seek(0)
-    return StreamingResponse(
-        output,
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": "attachment; filename=clientes.xlsx"},
-    )
-
+    return StreamingResponse(output, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", headers={"Content-Disposition": "attachment; filename=clientes.xlsx"})
 
 @app.post("/importar-excel")
-async def importar_excel(
-    file: UploadFile = File(...),
-    user=Depends(require_admin),
-    db: Session = Depends(get_db),
-):
+async def importar_excel(file: UploadFile = File(...), user=Depends(require_admin), db: Session = Depends(get_db)):
     if not file.filename.lower().endswith(".xlsx"):
         raise HTTPException(status_code=400, detail="El archivo debe ser .xlsx")
-
     contents = await file.read()
     df = pd.read_excel(BytesIO(contents))
-
     required_columns = {"nombre", "fecha_nacimiento", "telefono", "email", "nacionalidad", "compra"}
     missing = required_columns - set(df.columns)
     if missing:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Faltan columnas en el Excel: {', '.join(sorted(missing))}",
-        )
-
+        raise HTTPException(status_code=400, detail=f"Faltan columnas en el Excel: {', '.join(sorted(missing))}")
     inserted = 0
     skipped = 0
-
     for _, row in df.iterrows():
         nombre = str(row.get("nombre", "")).strip()
         telefono = str(row.get("telefono", "")).strip()
-
         raw_email = row.get("email", "")
-        email = ""
-        if pd.notna(raw_email):
-            email = str(raw_email).strip().lower()
-
+        email = str(raw_email).strip().lower() if pd.notna(raw_email) else ""
         if not nombre or not telefono:
             skipped += 1
             continue
-
-        existing = check_duplicate(db, email or None, telefono)
-        if existing:
+        if check_duplicate(db, email or None, telefono):
             skipped += 1
             continue
-
-        nuevo = models.Cliente(
+        db.add(models.Cliente(
             nombre=nombre,
             fecha_nacimiento=str(row.get("fecha_nacimiento", "")).strip() or None,
             telefono=telefono,
             email=email or None,
             nacionalidad=str(row.get("nacionalidad", "España")).strip() or "España",
             compra=str(row.get("compra", "")).strip() or None,
-        )
-        db.add(nuevo)
+        ))
         inserted += 1
-
     db.commit()
     return {"message": "Importación completada", "insertados": inserted, "omitidos": skipped}
 
-
 @app.delete("/admin/reset-clientes")
-def reset_clientes(
-    user=Depends(require_admin),
-    db: Session = Depends(get_db),
-):
+def reset_clientes(user=Depends(require_admin), db: Session = Depends(get_db)):
     db.query(models.Cliente).delete()
     db.commit()
     return {"message": "Todos los clientes han sido eliminados"}
