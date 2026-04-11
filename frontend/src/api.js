@@ -1,4 +1,4 @@
-const API_URL = "https://frontend-production-c2ef.up.railway.app/";
+const API_URL = "https://calzadospuntapie-production.up.railway.app";
 
 
 function getHeaders(token, extra = {}) {
