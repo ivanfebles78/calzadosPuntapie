@@ -21,20 +21,6 @@ const nationalities = [
 ];
 
 const days = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, "0"));
-const months = [
-  { value: "01", label: "Enero" },
-  { value: "02", label: "Febrero" },
-  { value: "03", label: "Marzo" },
-  { value: "04", label: "Abril" },
-  { value: "05", label: "Mayo" },
-  { value: "06", label: "Junio" },
-  { value: "07", label: "Julio" },
-  { value: "08", label: "Agosto" },
-  { value: "09", label: "Septiembre" },
-  { value: "10", label: "Octubre" },
-  { value: "11", label: "Noviembre" },
-  { value: "12", label: "Diciembre" },
-];
 
 const translations = {
   es: {
@@ -83,6 +69,20 @@ const translations = {
     phone: "Teléfono",
     email: "Email",
     purchase: "Compra / ticket",
+    months: [
+      { value: "01", label: "Enero" },
+      { value: "02", label: "Febrero" },
+      { value: "03", label: "Marzo" },
+      { value: "04", label: "Abril" },
+      { value: "05", label: "Mayo" },
+      { value: "06", label: "Junio" },
+      { value: "07", label: "Julio" },
+      { value: "08", label: "Agosto" },
+      { value: "09", label: "Septiembre" },
+      { value: "10", label: "Octubre" },
+      { value: "11", label: "Noviembre" },
+      { value: "12", label: "Diciembre" },
+    ],
   },
 
   en: {
@@ -131,6 +131,20 @@ const translations = {
     phone: "Phone",
     email: "Email",
     purchase: "Purchase / ticket",
+    months: [
+      { value: "01", label: "January" },
+      { value: "02", label: "February" },
+      { value: "03", label: "March" },
+      { value: "04", label: "April" },
+      { value: "05", label: "May" },
+      { value: "06", label: "June" },
+      { value: "07", label: "July" },
+      { value: "08", label: "August" },
+      { value: "09", label: "September" },
+      { value: "10", label: "October" },
+      { value: "11", label: "November" },
+      { value: "12", label: "December" },
+    ],
   },
 
   fr: {
@@ -179,6 +193,20 @@ const translations = {
     phone: "Téléphone",
     email: "E-mail",
     purchase: "Achat / ticket",
+    months: [
+      { value: "01", label: "Janvier" },
+      { value: "02", label: "Février" },
+      { value: "03", label: "Mars" },
+      { value: "04", label: "Avril" },
+      { value: "05", label: "Mai" },
+      { value: "06", label: "Juin" },
+      { value: "07", label: "Juillet" },
+      { value: "08", label: "Août" },
+      { value: "09", label: "Septembre" },
+      { value: "10", label: "Octobre" },
+      { value: "11", label: "Novembre" },
+      { value: "12", label: "Décembre" },
+    ],
   },
 
   de: {
@@ -227,6 +255,20 @@ const translations = {
     phone: "Telefon",
     email: "E-Mail",
     purchase: "Kauf / Beleg",
+    months: [
+      { value: "01", label: "Januar" },
+      { value: "02", label: "Februar" },
+      { value: "03", label: "März" },
+      { value: "04", label: "April" },
+      { value: "05", label: "Mai" },
+      { value: "06", label: "Juni" },
+      { value: "07", label: "Juli" },
+      { value: "08", label: "August" },
+      { value: "09", label: "September" },
+      { value: "10", label: "Oktober" },
+      { value: "11", label: "November" },
+      { value: "12", label: "Dezember" },
+    ],
   },
 
   ru: {
@@ -275,6 +317,20 @@ const translations = {
     phone: "Телефон",
     email: "Email",
     purchase: "Покупка / чек",
+    months: [
+      { value: "01", label: "Январь" },
+      { value: "02", label: "Февраль" },
+      { value: "03", label: "Март" },
+      { value: "04", label: "Апрель" },
+      { value: "05", label: "Май" },
+      { value: "06", label: "Июнь" },
+      { value: "07", label: "Июль" },
+      { value: "08", label: "Август" },
+      { value: "09", label: "Сентябрь" },
+      { value: "10", label: "Октябрь" },
+      { value: "11", label: "Ноябрь" },
+      { value: "12", label: "Декабрь" },
+    ],
   },
 };
 
@@ -482,7 +538,7 @@ function DesktopCustomerModal({ open, onClose, onSubmit, t }) {
                 </select>
                 <select value={form.cumple_mes} onChange={(e) => setForm({ ...form, cumple_mes: e.target.value })}>
                   <option value="">{t.birthdayMonth}</option>
-                  {months.map((month) => (
+                  {t.months.map((month) => (
                     <option key={month.value} value={month.value}>{month.label}</option>
                   ))}
                 </select>
@@ -601,7 +657,7 @@ function MobileCustomerScreen({ open, onClose, onSubmit, t }) {
             </select>
             <select value={form.cumple_mes} onChange={(e) => setForm({ ...form, cumple_mes: e.target.value })}>
               <option value="">{t.birthdayMonth}</option>
-              {months.map((month) => (
+              {t.months.map((month) => (
                 <option key={month.value} value={month.value}>{month.label}</option>
               ))}
             </select>
@@ -704,6 +760,17 @@ export default function App() {
   const [isMobile, setIsMobile] = useState(false);
 
   const t = translations[language] || translations.es;
+
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem("puntapie_language");
+    if (savedLanguage && translations[savedLanguage]) {
+      setLanguage(savedLanguage);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("puntapie_language", language);
+  }, [language]);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 640);
